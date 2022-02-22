@@ -13,22 +13,19 @@
 package org.openhab.binding.mqtt.frigate.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.openhab.core.thing.ThingTypeUID;
 
 /**
- * The {@link mqtt.frigateBindingConstants} class defines common constants, which are
- * used across the whole binding.
+ * The {@link frigateConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class mqtt.frigateBindingConstants {
+public class frigateConfiguration {
 
-    private static final String BINDING_ID = "mqtt.frigate";
-
-    // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
-
-    // List of all Channel ids
-    public static final String CHANNEL_1 = "channel1";
+    /**
+     * Sample configuration parameters. Replace with your own.
+     */
+    public String hostname = "";
+    public String password = "";
+    public int refreshInterval = 600;
 }

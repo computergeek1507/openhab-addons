@@ -32,16 +32,14 @@ import org.osgi.service.component.annotations.Component;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-@Component(configurationPid = "binding.mqtt.frigate", service = ThingHandlerFactory.class)
-public class mqtt.frigateHandlerFactory extends BaseThingHandlerFactory {
+@Component( service = ThingHandlerFactory.class)
+public class frigateHandlerFactory extends BaseThingHandlerFactory {
+    private final ThingRegistry thingRegistry;
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_SAMPLE);
-
-    @Override
-    public boolean supportsThingType(ThingTypeUID thingTypeUID) {
-        return SUPPORTED_THING_TYPES_UIDS.contains(thingTypeUID);
+    @Activate
+    public frigateHandlerFactory(final @Reference ThingRegistry thingRegistry) {
+        this.thingRegistry = thingRegistry;
     }
-
     @Override
     protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
