@@ -20,7 +20,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class frigateConfiguration {
+public class FrigateConfiguration {
 
     /**
      * Sample configuration parameters. Replace with your own.

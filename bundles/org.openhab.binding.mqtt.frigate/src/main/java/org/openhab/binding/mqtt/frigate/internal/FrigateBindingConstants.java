@@ -26,12 +26,16 @@ import org.openhab.core.thing.ThingTypeUID;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class frigateBindingConstants {
+public class FrigateBindingConstants {
 
     //private static final String BINDING_ID = "mqtt.frigate";
+    public static final String STATES_BASE_TOPIC = "milight/states/";
+    public static final String COMMANDS_BASE_TOPIC = "milight/commands/";
+    // List of all Thing Type UIDs
+    public static final ThingTypeUID THING_TYPE_CAMERA = new ThingTypeUID(BINDING_ID, "camera");
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    public static final Set<ThingTypeUID> SUPPORTED_THING_TYPES = Set.of(THING_TYPE_CAMERA);
 
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";
