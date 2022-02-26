@@ -13,6 +13,8 @@
 
 package org.openhab.binding.mqtt.frigate.internal.handler;
 
+import static org.openhab.binding.mqtt.frigate.internal.FrigateBindingConstants.*;
+
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 
@@ -50,14 +52,6 @@ public class FrigateHubHandler extends BaseThingHandler implements MqttConnectio
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private @Nullable MqttBrokerConnection connection;
     private ThingRegistry thingRegistry;
-    private String globeType = "";
-    private String bulbMode = "";
-    private String remotesGroupID = "";
-    private String channelPrefix = "";
-    private String fullCommandTopic = "";
-    private String fullStatesTopic = "";
-    private BigDecimal maxColourTemp = BigDecimal.ZERO;
-    private BigDecimal minColourTemp = BigDecimal.ZERO;
 
     public FrigateHubHandler(Thing thing, ThingRegistry thingRegistry) {
         super(thing);
@@ -65,7 +59,7 @@ public class FrigateHubHandler extends BaseThingHandler implements MqttConnectio
     }
 
     void changeChannel(String channel, State state) {
-        updateState(new ChannelUID(channelPrefix + channel), state);
+        updateState(new ChannelUID(channel), state);
     }
 
     private void processIncomingState(String messageJSON) {
@@ -137,14 +131,14 @@ public class FrigateHubHandler extends BaseThingHandler implements MqttConnectio
     private void sendMQTT(String payload) {
         MqttBrokerConnection localConnection = connection;
         if (localConnection != null) {
-            localConnection.publish(fullCommandTopic, payload.getBytes(), 1, false);
+            localConnection.publish(BASE_TOPIC, payload.getBytes(), 1, false);
         }
     }
 
     @Override
     public void processMessage(String topic, byte[] payload) {
         String state = new String(payload, StandardCharsets.UTF_8);
-        logger.trace("Recieved the following new Milight state:{}:{}", topic, state);
+        logger.trace("Recieved the following new frigate state:{}:{}", topic, state);
         processIncomingState(state);
     }
 
@@ -186,7 +180,7 @@ public class FrigateHubHandler extends BaseThingHandler implements MqttConnectio
                 localConnection.setUnsubscribeOnStop(true);
                 localConnection.addConnectionObserver(this);
                 localConnection.start();
-                localConnection.subscribe(fullStatesTopic + "/#", this);
+                localConnection.subscribe(STATES_TOPIC, this);
                 connection = localConnection;
                 if (localConnection.connectionState().compareTo(MqttConnectionState.CONNECTED) == 0) {
                     updateStatus(ThingStatus.ONLINE);
@@ -200,7 +194,7 @@ public class FrigateHubHandler extends BaseThingHandler implements MqttConnectio
     public void dispose() {
         MqttBrokerConnection localConnection = connection;
         if (localConnection != null) {
-            localConnection.unsubscribe(fullStatesTopic + "/#", this);
+            localConnection.unsubscribe(STATES_TOPIC, this);
         }
     }
 }

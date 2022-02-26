@@ -28,9 +28,9 @@ import org.openhab.core.thing.ThingTypeUID;
 @NonNullByDefault
 public class FrigateBindingConstants {
 
-    //private static final String BINDING_ID = "mqtt.frigate";
-    public static final String STATES_BASE_TOPIC = "milight/states/";
-    public static final String COMMANDS_BASE_TOPIC = "milight/commands/";
+    // private static final String BINDING_ID = "mqtt.frigate";
+    public static final String BASE_TOPIC = "frigate";
+    public static final String STATES_TOPIC = BASE_TOPIC + "/stats";
     // List of all Thing Type UIDs
     public static final ThingTypeUID THING_TYPE_CAMERA = new ThingTypeUID(BINDING_ID, "camera");
 

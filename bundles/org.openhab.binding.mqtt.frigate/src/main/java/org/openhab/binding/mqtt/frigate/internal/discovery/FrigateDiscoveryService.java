@@ -39,7 +39,7 @@ public class FrigateDiscoveryService extends AbstractMQTTDiscovery {
 
     @Activate
     public FrigateDiscoveryService(@Reference MQTTTopicDiscoveryService discoveryService) {
-        super(SUPPORTED_THING_TYPES, 3, true, STATES_BASE_TOPIC + "#");
+        super(SUPPORTED_THING_TYPES, 3, true, BASE_TOPIC + "/#");
         this.discoveryService = discoveryService;
     }
 
