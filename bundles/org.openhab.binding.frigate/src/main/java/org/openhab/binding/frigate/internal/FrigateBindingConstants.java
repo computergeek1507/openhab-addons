@@ -22,12 +22,12 @@ import org.openhab.core.thing.ThingTypeUID;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class frigateBindingConstants {
+public class FrigateBindingConstants {
 
     private static final String BINDING_ID = "frigate";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_SAMPLE = new ThingTypeUID(BINDING_ID, "sample");
+    public static final ThingTypeUID THING_TYPE_Camera = new ThingTypeUID(BINDING_ID, "camera");
 
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";

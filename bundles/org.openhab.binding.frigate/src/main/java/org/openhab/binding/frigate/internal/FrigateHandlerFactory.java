@@ -12,7 +12,7 @@
  */
 package org.openhab.binding.frigate.internal;
 
-import static org.openhab.binding.frigate.internal.frigateBindingConstants.*;
+import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 
 import java.util.Set;
 
@@ -33,7 +33,7 @@ import org.osgi.service.component.annotations.Component;
  */
 @NonNullByDefault
 @Component(configurationPid = "binding.frigate", service = ThingHandlerFactory.class)
-public class frigateHandlerFactory extends BaseThingHandlerFactory {
+public class FrigateHandlerFactory extends BaseThingHandlerFactory {
 
     private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_SAMPLE);
 

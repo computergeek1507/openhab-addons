@@ -4,45 +4,81 @@
 	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
 	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
 
-	<!-- Sample Thing Type -->
-	<thing-type id="sample">
-		<!-- Comment this in for Things which need a Bridge to function.
-			<supported-bridge-type-refs>
-			<bridge-type-ref id="frigateBridge" />
-			</supported-bridge-type-refs>
-		-->
+	<thing-type id="camera">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="server"/>
+		</supported-bridge-type-refs>
 
-		<label>frigate Binding Thing</label>
-		<description>Sample thing for frigate Binding</description>
-
+		<label>Frigate camera</label>
+		<description>Represents a Frigate camera</description>
 		<channels>
-			<channel id="channel1" typeId="sample-channel"/>
+			<channel id="name" typeId="name"/>
+			<channel id="image" typeId="image"/>
+			<channel id="state" typeId="state"/>
+			<channel id="imageUrl" typeId="url">
+				<label>Image URL</label>
+			</channel>
+			<channel id="videoUrl" typeId="url">
+				<label>Video URL</label>
+			</channel>
+			<channel id="eventId" typeId="eventId"/>
+			<channel id="eventName" typeId="eventName"/>
+			<channel id="eventType" typeId="eventType"/>
+			<channel id="eventStart" typeId="eventStart"/>
+			<channel id="eventEnd" typeId="eventEnd"/>
 		</channels>
 
-		<config-description>
-			<parameter name="hostname" type="text" required="true">
-				<context>network-address</context>
-				<label>Hostname</label>
-				<description>Hostname or IP address of the device</description>
-			</parameter>
-			<parameter name="password" type="text" required="true">
-				<context>password</context>
-				<label>Password</label>
-				<description>Password to access the device</description>
-			</parameter>
-			<parameter name="refreshInterval" type="integer" unit="s" min="1">
-				<label>Refresh Interval</label>
-				<description>Interval the device is polled in sec.</description>
-				<default>600</default>
-				<advanced>true</advanced>
-			</parameter>
-		</config-description>
+		<representation-property>name</representation-property>
+
+		<config-description-ref uri="thing-type:frigate:camera"/>
 	</thing-type>
 
-	<!-- Sample Channel Type -->
-	<channel-type id="sample-channel">
-		<item-type>Number:Temperature</item-type>
-		<label>Example Temperature</label><!-- Use uppercase words, except prepositions. 2-3 words, max 25 chars -->
-		<description>Sample channel for frigate Binding</description>
+	<channel-type id="name">
+		<item-type>String</item-type>
+		<label>Name</label>
+		<description>Camera name</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="image">
+		<item-type>Image</item-type>
+		<label>Image</label>
+		<description>A single snapshot image</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="state">
+		<item-type>String</item-type>
+		<label>State</label>
+		<description>Current monitor state</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="url">
+		<item-type>String</item-type>
+		<label>URL</label>
+		<description>URL of image or stream</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="eventId">
+		<item-type>String</item-type>
+		<label>Event Id</label>
+		<description>Id of the event</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="eventType">
+		<item-type>String</item-type>
+		<label>Event Type</label>
+		<description>Type of the Detection</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="eventStart">
+		<item-type>DateTime</item-type>
+		<label>Event Start</label>
+		<description>Start date/time of the event</description>
+		<state readOnly="true" pattern="%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"></state>
+	</channel-type>
+	<channel-type id="eventEnd">
+		<item-type>DateTime</item-type>
+		<label>Event End</label>
+		<description>End date/time of the event</description>
+		<state readOnly="true" pattern="%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS"></state>
 	</channel-type>
 </thing:thing-descriptions>

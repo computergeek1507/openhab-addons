@@ -10,22 +10,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.frigate.internal;
-
-import org.eclipse.jdt.annotation.NonNullByDefault;
-
+package org.openhab.binding.frigate.internal.dto;
 /**
- * The {@link frigateConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link CameraDTO} entity from the Frigate API
  *
  * @author Scott Hanson - Initial contribution
  */
-@NonNullByDefault
-public class frigateConfiguration {
-
-    /**
-     * Sample configuration parameters. Replace with your own.
-     */
-    public String hostname = "";
-    public String password = "";
-    public int refreshInterval = 600;
+public class CameraDTO {
+    public int fps;
+    public int h;
+    public int bbox;
+    public int timestamp;
+    public int zones;
+    public int mask;
+    public int motion;
+    public int regions;
 }

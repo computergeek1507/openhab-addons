@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="frigate"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- frigate server -->
+	<bridge-type id="server">
+		<label>Frigate Server</label>
+		<description>Local Frigate NVR Server</description>
+
+		<config-description>
+			<parameter name="ipaddress" type="text" required="true">
+				<label>IP Address</label>
+				<context>server</context>
+				<description>IP Address of Frigate Server </description>
+				<required>true</required>
+			</parameter>
+			<parameter name="port" type="integer">
+				<label>Broker Port</label>
+				<description>Sever Connection port, the typical
+					ports is 5000.</description>
+				<context>server</context>
+			</parameter>
+			<parameter name="mqttip" type="text" required="true">
+				<label>Broker Hostname/IP</label>
+				<description>The IP/Hostname of the MQTT broker</description>
+				<context>mqtt</context>
+			</parameter>
+
+			<parameter name="mqttport" type="integer">
+				<label>Broker Port</label>
+				<description>The port is optional, if none is provided, the typical
+					ports 1883 and 8883 (SSL) are used.</description>
+				<context>mqtt</context>
+			</parameter>
+		</config-description>
+		<config-description-ref uri="thing-type:frigate:server"/>
+		<channels>
+			<channel id="frigateversion" typeId="version">
+				<label>frigate version</label>
+				<description>frigate version</description>
+			</channel>
+			<channel id="detectionfps" typeId="fps">
+				<label>Detection FPS</label>
+			</channel>
+			<channel id="detectors" typeId="type">
+				<label>Detectors</label>
+				<description>Detectors Type</description>
+			</channel>
+		</channels>
+	</bridge-type>
+
+	<channel-type id="version">
+		<item-type>String</item-type>
+		<label>Version</label>
+		<description>Version</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+	<channel-type id="fps">
+		<item-type>Number</item-type>
+		<label>fps</label>
+		<description>frames per second</description>
+		<state readOnly="true" pattern="%.1f %unit%"></state>
+	</channel-type>
+	<channel-type id="type">
+		<item-type>String</item-type>
+		<label>Type</label>
+		<description>Type</description>
+		<state readOnly="true" pattern="%s"></state>
+	</channel-type>
+</thing:thing-descriptions>
