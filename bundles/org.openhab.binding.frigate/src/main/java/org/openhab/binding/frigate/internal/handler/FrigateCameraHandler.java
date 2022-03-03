@@ -13,10 +13,10 @@
 package org.openhab.binding.frigate.internal.handler;
 
 import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
-import org.openhab.binding.frigate.internal.FrigateConfiguration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.openhab.binding.frigate.internal.FrigateConfiguration;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class FrigateCameraHandler  extends BaseThingHandler {
+public class FrigateCameraHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(FrigateCameraHandler.class);
 
     private @Nullable FrigateConfiguration config;
@@ -44,7 +44,7 @@ public class FrigateCameraHandler  extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
-        if (CHANNEL_1.equals(channelUID.getId())) {
+        if (CHANNEL_STATE.equals(channelUID.getId())) {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
             }

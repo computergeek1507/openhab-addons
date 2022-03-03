@@ -28,9 +28,9 @@ public class EventDTO {
     public float start_time;
     public float end_time;
     public float score;
-    //"box": [424, 500, 536, 712],
+    public int[] box; //: [424, 500, 536, 712],
     public float area;
-    //"region": [264, 450, 667, 853],
+    public int[]region; // : [264, 450, 667, 853],
     public String current_zones;
     public String entered_zones;
     public boolean has_snapshot;

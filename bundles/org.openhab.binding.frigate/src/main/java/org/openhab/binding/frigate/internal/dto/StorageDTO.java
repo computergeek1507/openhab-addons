@@ -12,15 +12,14 @@
  */
 package org.openhab.binding.frigate.internal.dto;
 
-import java.util.Map;
-
 /**
- * The {@link StatsDTO} entity from the Frigate API
+ * The {@link ServiceDTO} entity from the Frigate API
  *
  * @author Scott Hanson - Initial contribution
  */
-public class StatsDTO {
-    public Map<String, CameraDTO> cameras;
-    public int detection_fps;
-    public String version;
+public class StorageDTO {
+    public double free;
+    public double total;
+    public double used;
+    public String mount_type;
 }

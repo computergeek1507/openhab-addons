@@ -25,8 +25,9 @@ public class FrigateConfiguration {
     /**
      * Sample configuration parameters. Replace with your own.
      */
+    public String ipaddress = "";
     public String ipAddress = "";
     public int port = 5000;
-    public String mqttIpAddress = "";
-    public int mqttPort = 1883;
+    public String mqttipaddress = "";
+    public int mqttport = 1883;
 }

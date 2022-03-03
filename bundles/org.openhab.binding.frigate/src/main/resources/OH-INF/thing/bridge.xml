@@ -9,7 +9,7 @@
 		<label>Frigate Server</label>
 		<description>Local Frigate NVR Server</description>
 
-		<config-description-ref uri="thing-type:frigate:server"/>
+
 		<channels>
 			<channel id="frigateversion" typeId="version">
 				<label>frigate version</label>
@@ -23,6 +23,7 @@
 				<description>Detectors Type</description>
 			</channel>
 		</channels>
+		<config-description-ref uri="thing-type:frigate:server"/>
 	</bridge-type>
 
 	<channel-type id="version">
