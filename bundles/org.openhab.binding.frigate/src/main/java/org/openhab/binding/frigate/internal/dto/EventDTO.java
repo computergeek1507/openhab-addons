@@ -26,7 +26,7 @@ public class EventDTO {
     public float top_score;
     public boolean false_positive;
     public float start_time;
-    public float end_time";
+    public float end_time;
     public float score;
     //"box": [424, 500, 536, 712],
     public float area;

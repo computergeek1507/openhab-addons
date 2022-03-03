@@ -13,6 +13,7 @@
 package org.openhab.binding.frigate.internal.handler;
 
 import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
+import org.openhab.binding.frigate.internal.FrigateConfiguration;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 public class FrigateCameraHandler  extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(FrigateCameraHandler.class);
 
-    private @Nullable frigateConfiguration config;
+    private @Nullable FrigateConfiguration config;
 
     public FrigateCameraHandler(Thing thing) {
         super(thing);

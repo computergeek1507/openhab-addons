@@ -29,7 +29,7 @@ public class StatsDTO {
     public String name;
     public String createdDate;
     public String accountId;
-    public DeviceStateDTO state;
+    public String state;
     public String parentDevice;
     public String parentDeviceId;
 }

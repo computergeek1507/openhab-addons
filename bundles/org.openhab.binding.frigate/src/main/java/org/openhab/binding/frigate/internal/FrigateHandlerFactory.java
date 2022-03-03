@@ -13,17 +13,25 @@
 package org.openhab.binding.frigate.internal;
 
 import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
+import org.openhab.binding.frigate.internal.handler.FrigateServerHandler;
+import org.openhab.binding.frigate.internal.handler.FrigateCameraHandler;
+
 
 import java.util.Set;
-
+import org.openhab.core.auth.client.oauth2.OAuthFactory;
+import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.core.thing.Thing;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ThingTypeUID;
 import org.openhab.core.thing.binding.BaseThingHandlerFactory;
 import org.openhab.core.thing.binding.ThingHandler;
 import org.openhab.core.thing.binding.ThingHandlerFactory;
+import org.openhab.core.io.net.http.HttpClientFactory;
+import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * The {@link frigateHandlerFactory} is responsible for creating things and thing
@@ -34,8 +42,13 @@ import org.osgi.service.component.annotations.Component;
 @NonNullByDefault
 @Component(configurationPid = "binding.frigate", service = ThingHandlerFactory.class)
 public class FrigateHandlerFactory extends BaseThingHandlerFactory {
+    private final HttpClient httpClient;
+    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_CAMERA,THING_TYPE_SERVER);
+    @Activate
+    public FrigateHandlerFactory(final @Reference HttpClientFactory httpClientFactory) {
+        this.httpClient = httpClientFactory.getCommonHttpClient();
 
-    private static final Set<ThingTypeUID> SUPPORTED_THING_TYPES_UIDS = Set.of(THING_TYPE_SAMPLE);
+    }
 
     @Override
     public boolean supportsThingType(ThingTypeUID thingTypeUID) {
@@ -45,9 +58,12 @@ public class FrigateHandlerFactory extends BaseThingHandlerFactory {
     @Override
     protected @Nullable ThingHandler createHandler(Thing thing) {
         ThingTypeUID thingTypeUID = thing.getThingTypeUID();
-
-        if (THING_TYPE_SAMPLE.equals(thingTypeUID)) {
-            return new frigateHandler(thing);
+        
+        if (THING_TYPE_SERVER.equals(thingTypeUID)) {
+            return new FrigateServerHandler((Bridge) thing, httpClient);
+        }
+        if (THING_TYPE_CAMERA.equals(thingTypeUID)) {
+            return new FrigateCameraHandler(thing);
         }
 
         return null;

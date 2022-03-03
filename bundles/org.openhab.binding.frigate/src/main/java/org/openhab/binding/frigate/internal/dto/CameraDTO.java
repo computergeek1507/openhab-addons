@@ -11,6 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 package org.openhab.binding.frigate.internal.dto;
+
 /**
  * The {@link CameraDTO} entity from the Frigate API
  *

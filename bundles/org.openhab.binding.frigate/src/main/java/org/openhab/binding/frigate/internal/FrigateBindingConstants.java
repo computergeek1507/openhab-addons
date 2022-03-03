@@ -27,7 +27,8 @@ public class FrigateBindingConstants {
     private static final String BINDING_ID = "frigate";
 
     // List of all Thing Type UIDs
-    public static final ThingTypeUID THING_TYPE_Camera = new ThingTypeUID(BINDING_ID, "camera");
+    public static final ThingTypeUID THING_TYPE_SERVER = new ThingTypeUID(BINDING_ID, "server");
+    public static final ThingTypeUID THING_TYPE_CAMERA = new ThingTypeUID(BINDING_ID, "camera");
 
     // List of all Channel ids
     public static final String CHANNEL_1 = "channel1";

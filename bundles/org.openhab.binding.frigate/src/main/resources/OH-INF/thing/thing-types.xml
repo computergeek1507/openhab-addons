@@ -29,8 +29,6 @@
 		</channels>
 
 		<representation-property>name</representation-property>
-
-		<config-description-ref uri="thing-type:frigate:camera"/>
 	</thing-type>
 
 	<channel-type id="name">
