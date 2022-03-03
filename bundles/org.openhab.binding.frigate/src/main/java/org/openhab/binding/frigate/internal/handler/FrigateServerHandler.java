@@ -17,24 +17,30 @@ import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.frigate.internal.FrigateConfiguration;
 import org.openhab.binding.frigate.internal.dto.ServiceDTO;
 import org.openhab.core.io.net.http.HttpUtil;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.binding.BaseBridgeHandler;
 import org.openhab.core.types.Command;
-import org.openhab.core.library.types.StringType;
-import org.openhab.core.library.types.DecimalType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +48,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * The {@link FrigateServerHandler} is responsible for communicating with the Frigate Server
@@ -76,42 +81,33 @@ public class FrigateServerHandler extends BaseBridgeHandler {
 
         host = config.ipaddress;
         portNumber = config.port;
-        
-        // int returnCode = Integer.parseInt(rootNode.get("ReturnCode").getAsString());
-        // StatsDTO stats = GSON.fromJson(response, StatsDTO.class);
-        // Example for background initialization:
-        scheduler.execute(() -> {
-            //boolean thingReachable = true; // <background task with long running initialization here>
-            // when done do:
-            String response = executeGet(buildBaseUrl("/api/stats"));
-            if(response != null) {
-                updateStatus(ThingStatus.ONLINE);
-                JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
-                Set<String> keys  =  jsonObject.keySet();
-                for (String key : keys){
-                    System.out.println("Key:: !!! >>> "+key);
-                    Object value = jsonObject.get(key);
-                    System.out.println("Value Type "+value.getClass().getName());
-                    if(key.equals( "detection_fps")){
-                        //Float fps = jsonObject.get(key).getAsFloat();
-                        //updateState(CHANNEL_DETECTION_FPS, new DecimalType(fps));
-                    }
-                    else if(key.equals( "detectors")){
 
-                    }
-                    else if(key.equals( "service")){
-                        ServiceDTO ser = GSON.fromJson(jsonObject.get(key), ServiceDTO.class);
-                        updateState(CHANNEL_VERSION, new StringType(ser.version));
-                    }
-                    else{
+        // boolean thingReachable = true; // <background task with long running initialization here>
+        // when done do:
+        String response = executeGet(buildBaseUrl("/api/stats"));
+        if (response != null) {
+            updateStatus(ThingStatus.ONLINE);
+            JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
+            Set<String> keys = jsonObject.keySet();
+            for (String key : keys) {
+                System.out.println("Key:: !!! >>> " + key);
+                Object value = jsonObject.get(key);
+                System.out.println("Value Type " + value.getClass().getName());
+                if (key.equals("detection_fps")) {
+                    // Float fps = jsonObject.get(key).getAsFloat();
+                    // updateState(CHANNEL_DETECTION_FPS, new DecimalType(fps));
+                } else if (key.equals("detectors")) {
 
-                    }
+                } else if (key.equals("service")) {
+                    ServiceDTO ser = GSON.fromJson(jsonObject.get(key), ServiceDTO.class);
+                    updateState(CHANNEL_VERSION, new StringType(ser.version));
+                } else {
+
                 }
-            }            
-            else{
-                updateStatus(ThingStatus.OFFLINE);
-            }           
-        });
+            }
+        } else {
+            updateStatus(ThingStatus.OFFLINE);
+        }
     }
 
     public @Nullable String executeGet(String url) {
@@ -144,7 +140,34 @@ public class FrigateServerHandler extends BaseBridgeHandler {
         return null;
     }
 
-    private String buildBaseUrl(String path) {
+    public @Nullable RawType getImage(String url) {
+        int timeout = API_TIMEOUT_MSEC;
+        Request request = httpClient.newRequest(buildBaseUrl(url));
+        request.method(HttpMethod.GET);
+        request.timeout(timeout, TimeUnit.MILLISECONDS);
+
+        String errorMsg;
+        try {
+            ContentResponse response = request.send();
+            if (response.getStatus() == HttpStatus.OK_200) {
+                RawType image = new RawType(response.getContent(), response.getHeaders().get(HttpHeader.CONTENT_TYPE));
+                return image;
+            } else {
+                errorMsg = String.format("HTTP GET failed: %d, %s", response.getStatus(), response.getReason());
+            }
+        } catch (TimeoutException e) {
+            errorMsg = String.format("TimeoutException: Call to Frigate Server timed out after {} msec", timeout);
+        } catch (ExecutionException e) {
+            errorMsg = String.format("ExecutionException: %s", e.getMessage());
+        } catch (InterruptedException e) {
+            errorMsg = String.format("InterruptedException: %s", e.getMessage());
+            Thread.currentThread().interrupt();
+        }
+        logger.debug("{}", errorMsg);
+        return null;
+    }
+
+    public String buildBaseUrl(String path) {
         StringBuilder sb = new StringBuilder();
         sb.append("http://");
         sb.append(host);
@@ -152,6 +175,4 @@ public class FrigateServerHandler extends BaseBridgeHandler {
         sb.append(path);
         return sb.toString();
     }
-
-    
 }

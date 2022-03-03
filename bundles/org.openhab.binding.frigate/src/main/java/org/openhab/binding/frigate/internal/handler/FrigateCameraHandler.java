@@ -17,14 +17,21 @@ import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.frigate.internal.FrigateConfiguration;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.binding.BaseThingHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
+import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 /**
  * The {@link FrigateCameraHandler} is responsible for handling commands, which are
@@ -37,6 +44,8 @@ public class FrigateCameraHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(FrigateCameraHandler.class);
 
     private @Nullable FrigateConfiguration config;
+    private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    private String cameraName = "";
 
     public FrigateCameraHandler(Thing thing) {
         super(thing);
@@ -44,6 +53,11 @@ public class FrigateCameraHandler extends BaseThingHandler {
 
     @Override
     public void handleCommand(ChannelUID channelUID, Command command) {
+
+        if (command instanceof RefreshType) {
+            updateImage();
+            return;
+        }
         if (CHANNEL_STATE.equals(channelUID.getId())) {
             if (command instanceof RefreshType) {
                 // TODO: handle data refresh
@@ -61,6 +75,8 @@ public class FrigateCameraHandler extends BaseThingHandler {
     @Override
     public void initialize() {
         config = getConfigAs(FrigateConfiguration.class);
+        cameraName = getConfig().get(CONFIG_CAMERA).toString();
+        logger.debug("Thing Name: {}", cameraName);
 
         // TODO: Initialize the handler.
         // The framework requires you to return from this method quickly, i.e. any network access must be done in
@@ -78,9 +94,17 @@ public class FrigateCameraHandler extends BaseThingHandler {
 
         // Example for background initialization:
         scheduler.execute(() -> {
-            boolean thingReachable = true; // <background task with long running initialization here>
+            boolean thingReachable = updateImage(); // <background task with long running initialization here>
             // when done do:
             if (thingReachable) {
+                FrigateServerHandler localHandler = getGatewayHandler();
+                if (localHandler != null) {
+                    String imgurl = String.format("/api/%s/latest.jpg", cameraName);
+                    updateState(CHANNEL_IMAGE_URL, new StringType(localHandler.buildBaseUrl(imgurl)));
+                    String streamurl = String.format("/api/%s", cameraName);
+                    updateState(CHANNEL_VIDEO_URL, new StringType(localHandler.buildBaseUrl(streamurl)));
+                }
+
                 updateStatus(ThingStatus.ONLINE);
             } else {
                 updateStatus(ThingStatus.OFFLINE);
@@ -100,5 +124,30 @@ public class FrigateCameraHandler extends BaseThingHandler {
         // Add a description to give user information to understand why thing does not work as expected. E.g.
         // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
         // "Can not access device as username and/or password are invalid");
+    }
+
+    protected @Nullable FrigateServerHandler getGatewayHandler() {
+        Bridge gateway = getBridge();
+        return gateway == null ? null : (FrigateServerHandler) gateway.getHandler();
+    }
+
+    private boolean updateImage() {
+        FrigateServerHandler localHandler = getGatewayHandler();
+        if (localHandler != null) {
+            logger.debug("Camera {}: Updating image channel", cameraName);
+            String imgurl = String.format("/api/%s/latest.jpg", cameraName);
+            RawType image = localHandler.getImage(imgurl);
+            if (image != null) {
+                updateState(CHANNEL_IMAGE, image);
+                updateState(CHANNEL_IMAGE_URL, new StringType(localHandler.buildBaseUrl(imgurl)));
+                String streamurl = String.format("/api/%s", cameraName);
+                updateState(CHANNEL_VIDEO_URL, new StringType(localHandler.buildBaseUrl(streamurl)));
+                return true;
+            }
+        }
+        updateState(CHANNEL_IMAGE, UnDefType.UNDEF);
+        updateState(CHANNEL_IMAGE_URL, UnDefType.UNDEF);
+        updateState(CHANNEL_VIDEO_URL, UnDefType.UNDEF);
+        return false;
     }
 }

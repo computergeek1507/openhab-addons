@@ -50,7 +50,8 @@
             "args": [
                 "clean",
                 "install",
-                "-DskipChecks"
+                "-DskipChecks",
+                "'-Dspotless.check.skip'"
             ],
             "problemMatcher": []
         },
@@ -62,7 +63,8 @@
                 "-o",
                 "clean",
                 "install",
-                "-DskipChecks"
+                "-DskipChecks",
+                "'-Dspotless.check.skip'"
             ],
             "problemMatcher": []
         },

@@ -9,10 +9,9 @@
 			<bridge-type-ref id="server"/>
 		</supported-bridge-type-refs>
 
-		<label>Frigate camera</label>
+		<label>Frigate Camera</label>
 		<description>Represents a Frigate camera</description>
 		<channels>
-			<channel id="name" typeId="name"/>
 			<channel id="image" typeId="image"/>
 			<channel id="state" typeId="state"/>
 			<channel id="imageUrl" typeId="url">
@@ -27,8 +26,7 @@
 			<channel id="eventStart" typeId="eventStart"/>
 			<channel id="eventEnd" typeId="eventEnd"/>
 		</channels>
-
-		<representation-property>name</representation-property>
+		<config-description-ref uri="thing-type:frigate:camera"/>
 	</thing-type>
 
 	<channel-type id="name">

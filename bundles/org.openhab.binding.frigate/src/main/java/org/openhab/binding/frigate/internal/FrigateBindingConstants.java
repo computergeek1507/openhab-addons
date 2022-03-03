@@ -30,9 +30,14 @@ public class FrigateBindingConstants {
     public static final ThingTypeUID THING_TYPE_SERVER = new ThingTypeUID(BINDING_ID, "server");
     public static final ThingTypeUID THING_TYPE_CAMERA = new ThingTypeUID(BINDING_ID, "camera");
 
+    public static final String CONFIG_CAMERA = "name";
+    public static final String CHANNEL_IMAGE = "image";
+    public static final String CHANNEL_IMAGE_URL = "imageUrl";
+    public static final String CHANNEL_VIDEO_URL = "videoUrl";
+
     // List of all Channel ids
     public static final String CHANNEL_VERSION = "frigateversion";
     public static final String CHANNEL_DETECTION_FPS = "detectionfps";
-    
+
     public static final String CHANNEL_STATE = "state";
 }

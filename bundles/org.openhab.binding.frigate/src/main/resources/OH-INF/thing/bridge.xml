@@ -12,8 +12,8 @@
 
 		<channels>
 			<channel id="frigateversion" typeId="version">
-				<label>frigate version</label>
-				<description>frigate version</description>
+				<label>Frigate version</label>
+				<description>Frigate version</description>
 			</channel>
 			<channel id="detectionfps" typeId="fps">
 				<label>Detection FPS</label>
