@@ -13,21 +13,16 @@
 
 package org.openhab.binding.frigate.internal.handler;
 
-import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -41,11 +36,12 @@ import org.eclipse.jetty.http.HttpMethod;
 import org.eclipse.jetty.http.HttpStatus;
 import org.openhab.binding.frigate.internal.FrigateServerConfiguration;
 import org.openhab.binding.frigate.internal.dto.EventDTO;
-import org.openhab.binding.frigate.internal.dto.EventsDTO;
 import org.openhab.binding.frigate.internal.dto.ServiceDTO;
 import org.openhab.binding.frigate.internal.events.IEventsHandler;
 import org.openhab.core.io.net.http.HttpUtil;
 import org.openhab.core.io.transport.mqtt.MqttConnectionState;
+import org.openhab.core.library.types.RawType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -53,8 +49,6 @@ import org.openhab.core.thing.ThingStatus;
 import org.openhab.core.thing.binding.BaseBridgeHandler;
 import org.openhab.core.types.Command;
 import org.openhab.core.types.RefreshType;
-import org.openhab.core.library.types.StringType;
-import org.openhab.core.library.types.RawType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +56,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * The {@link FrigateServerHandler} is responsible for communicating with the Frigate Server
@@ -70,7 +63,7 @@ import com.google.gson.reflect.TypeToken;
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class FrigateServerHandler extends BaseBridgeHandler  {
+public class FrigateServerHandler extends BaseBridgeHandler {
     private @Nullable FrigateServerConfiguration config;
     private HttpClient httpClient;
     private final Logger logger = LoggerFactory.getLogger(FrigateServerHandler.class);
@@ -109,58 +102,53 @@ public class FrigateServerHandler extends BaseBridgeHandler  {
         if (command instanceof RefreshType) {
             getStats();
             return;
-        }        
+        }
     }
 
     @Override
     public void initialize() {
         config = getConfigAs(FrigateServerConfiguration.class);
         updateStatus(ThingStatus.UNKNOWN);
-
-        host = config.ipaddress;
-        portNumber = config.port;
-
-        mqttHost = config.mqttipaddress;
-        mqttPort = config.mqttport;
-        
+        if (config != null) {
+            host = config.ipaddress;
+            portNumber = config.port;
+            mqttHost = config.mqttipaddress;
+            mqttPort = config.mqttport;
+        }
         scheduler.execute(() -> {
             boolean worked = getStats();
-            if(worked) {
-                updateStatus(ThingStatus.ONLINE);                
-                if(!mqttHost.isEmpty()){
-                    connect(mqttHost,mqttPort);
+            if (worked) {
+                updateStatus(ThingStatus.ONLINE);
+                if (!mqttHost.isEmpty()) {
+                    connect(mqttHost, mqttPort);
                 }
-            }            
-            else{
+            } else {
                 updateStatus(ThingStatus.OFFLINE);
             }
         });
     }
 
-    private boolean getStats(){
+    private boolean getStats() {
         String response = executeGet(buildBaseUrl("/api/stats"));
-        if(response != null) {
+        if (response != null) {
             updateStatus(ThingStatus.ONLINE);
             JsonObject jsonObject = JsonParser.parseString(response).getAsJsonObject();
-            Set<String> keys  =  jsonObject.keySet();
-            for (String key : keys){
-                if(key.equals( "detection_fps")){
-                    //Float fps = jsonObject.get(key).getAsFloat();
-                    //updateState(CHANNEL_DETECTION_FPS, new DecimalType(fps));
-                }
-                else if(key.equals( "detectors")){
+            Set<String> keys = jsonObject.keySet();
+            for (String key : keys) {
+                if (key.equals("detection_fps")) {
+                    // Float fps = jsonObject.get(key).getAsFloat();
+                    // updateState(CHANNEL_DETECTION_FPS, new DecimalType(fps));
+                } else if (key.equals("detectors")) {
 
-                }
-                else if(key.equals( "service")){
+                } else if (key.equals("service")) {
                     ServiceDTO ser = GSON.fromJson(jsonObject.get(key), ServiceDTO.class);
                     updateState(CHANNEL_VERSION, new StringType(ser.version));
-                }
-                else{
+                } else {
 
                 }
             }
             return true;
-        }      
+        }
         return false;
     }
 
@@ -232,8 +220,8 @@ public class FrigateServerHandler extends BaseBridgeHandler  {
 
     private void connect(String mqttIP, int port) {
         logger.debug("Connecting MQTT to {}", mqttIP);
-        String userID = "openHabFrigate_" + randomString(5);     
-        connection.connect(mqttIP, port, userID);    
+        String userID = "openHabFrigate_" + randomString(5);
+        connection.connect(mqttIP, port, userID);
     }
 
     private static String randomString(int length) {
@@ -249,44 +237,44 @@ public class FrigateServerHandler extends BaseBridgeHandler  {
 
     public void receive(final String topic, final byte[] message) {
         logger.trace("Got topic {}", topic);
-        //String json = new String(message, UTF_8);
+        // String json = new String(message, UTF_8);
 
-        if(topic.startsWith("frigate/") && topic.endsWith("/snapshot")){
+        if (topic.startsWith("frigate/") && topic.endsWith("/snapshot")) {
             Bridge bridge = getThing();
             List<Thing> things = bridge.getThings();
             for (Thing thing : things) {
                 FrigateCameraHandler cam = (FrigateCameraHandler) thing.getHandler();
                 if (cam != null) {
-                    String detect_topic = String.format("frigate/%s/",cam.GetCameraName());
-                    //frigate/<camera_name>/<type>/snapshot
-                    if(topic.contains(detect_topic)) {                        
-                        logger.trace("updating snapshot for {}",cam.GetCameraName());
+                    String detect_topic = String.format("frigate/%s/", cam.GetCameraName());
+                    // frigate/<camera_name>/<type>/snapshot
+                    if (topic.contains(detect_topic)) {
+                        logger.trace("updating snapshot for {}", cam.GetCameraName());
                         cam.SetLastObject(message);
                     }
                 }
             }
         }
-        if(topic.startsWith("frigate/events") ){
+        if (topic.startsWith("frigate/events")) {
 
             String json = new String(message, UTF_8);
-            //EventsDTO event = GSON.fromJson(json, EventsDTO.class);
+            // EventsDTO event = GSON.fromJson(json, EventsDTO.class);
             JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
-            String type  = jsonObject.get("type").toString();
+            String type = jsonObject.get("type").toString();
             EventDTO event = GSON.fromJson(jsonObject.get("after"), EventDTO.class);
-            //EventsDTO
-            //if(type.equals("end")){
-                Bridge bridge = getThing();
-                List<Thing> things = bridge.getThings();
-                for (Thing thing : things) {
-                    FrigateCameraHandler cam = (FrigateCameraHandler) thing.getHandler();
-                    if (cam != null) {
-                        if(event.camera.equals(cam.GetCameraName())) {                        
-                            logger.trace("updating event for {}",cam.GetCameraName());
-                            cam.UpdateEvent(event);
-                        }
+            // EventsDTO
+            // if(type.equals("end")){
+            Bridge bridge = getThing();
+            List<Thing> things = bridge.getThings();
+            for (Thing thing : things) {
+                FrigateCameraHandler cam = (FrigateCameraHandler) thing.getHandler();
+                if (cam != null) {
+                    if (event.camera.equals(cam.GetCameraName())) {
+                        logger.trace("updating event for {}", cam.GetCameraName());
+                        cam.UpdateEvent(event);
                     }
                 }
-            //}
+            }
+            // }
         }
     }
 }

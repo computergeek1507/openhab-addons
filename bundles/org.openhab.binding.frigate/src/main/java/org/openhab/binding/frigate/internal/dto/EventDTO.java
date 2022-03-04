@@ -20,22 +20,22 @@ package org.openhab.binding.frigate.internal.dto;
 public class EventDTO {
     public String id;
     public String camera;
-    public double frame_time;
-    public double snapshot_time;
+    //public double frame_time;
+    //public double snapshot_time;
     public String label;
     public float top_score;
-    public boolean false_positive;
-    public double start_time;
-    public double end_time;
-    public float score;
-    //public int[] box; // : [424, 500, 536, 712],
-    public float area;
-    //public int[] region; // : [264, 450, 667, 853],
-    //public String[] current_zones;
-    //public String[] entered_zones;
-    public boolean has_snapshot;
-    public boolean has_clip;
-    public boolean stationary;
-    public int motionless_count;
-    public int position_changes;
+    //public boolean false_positive;
+    //public double start_time;
+    //public double end_time;
+    //public float score;
+    // public int[] box; // : [424, 500, 536, 712],
+    //public float area;
+    // public int[] region; // : [264, 450, 667, 853],
+    // public String[] current_zones;
+    // public String[] entered_zones;
+    //public boolean has_snapshot;
+    //public boolean has_clip;
+    //public boolean stationary;
+    //public int motionless_count;
+    //public int position_changes;
 }

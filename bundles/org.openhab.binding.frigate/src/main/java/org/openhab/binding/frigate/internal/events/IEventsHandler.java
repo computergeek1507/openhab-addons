@@ -14,9 +14,6 @@ package org.openhab.binding.frigate.internal.events;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -100,7 +97,7 @@ public abstract class IEventsHandler implements MqttConnectionObserver, MqttMess
             if (connection != null) {
                 reconnect = null;
 
-                    connection.subscribe("frigate/#", this).exceptionally(exception -> {
+                connection.subscribe("frigate/#", this).exceptionally(exception -> {
                     logger.warn("MQTT subscription failed: {}", exception.getMessage());
                     return false;
                 }).thenAccept(successful -> {
@@ -121,9 +118,6 @@ public abstract class IEventsHandler implements MqttConnectionObserver, MqttMess
 
     @Override
     public void processMessage(String topic, byte[] payload) {
-        // Report raw JSON reply
-        final String json = new String(payload, UTF_8);
-
         receive(topic, payload);
     }
 

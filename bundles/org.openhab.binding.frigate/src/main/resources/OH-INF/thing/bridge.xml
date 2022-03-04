@@ -8,20 +8,18 @@
 	<bridge-type id="server">
 		<label>Frigate Server</label>
 		<description>Local Frigate NVR Server</description>
-
-
 		<channels>
 			<channel id="frigateversion" typeId="version">
 				<label>Frigate version</label>
 				<description>Frigate version</description>
 			</channel>
-			<channel id="detectionfps" typeId="fps">
+			<!--<channel id="detectionfps" typeId="fps">
 				<label>Detection FPS</label>
 			</channel>
 			<channel id="detectors" typeId="type">
 				<label>Detectors</label>
 				<description>Detectors Type</description>
-			</channel>
+			</channel>-->
 		</channels>
 		<config-description-ref uri="thing-type:frigate:server"/>
 	</bridge-type>
