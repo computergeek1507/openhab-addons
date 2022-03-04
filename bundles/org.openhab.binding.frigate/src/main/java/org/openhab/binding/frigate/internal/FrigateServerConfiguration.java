@@ -10,15 +10,20 @@
  *
  * SPDX-License-Identifier: EPL-2.0
  */
-package org.openhab.binding.frigate.internal.dto;
+package org.openhab.binding.frigate.internal;
+
+import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link EventsDTO} entity from the Frigate API
+ * The {@link FrigateServerConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Scott Hanson - Initial contribution
  */
-public class EventsDTO {
-    public String type;
-    public EventDTO before;
-    public EventDTO after;
+@NonNullByDefault
+public class FrigateServerConfiguration {
+
+    public String ipaddress = "";
+    public int port = 5000;
+    public String mqttipaddress = "";
+    public int mqttport = 1883;
 }

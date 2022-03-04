@@ -14,11 +14,22 @@ package org.openhab.binding.frigate.internal.handler;
 
 import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 
+import java.time.ZonedDateTime;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.openhab.binding.frigate.internal.FrigateConfiguration;
+import org.openhab.binding.frigate.internal.FrigateCameraConfiguration;
+import org.openhab.binding.frigate.internal.dto.EventDTO;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.library.types.DateTimeType;
+import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OpenClosedType;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
@@ -29,6 +40,7 @@ import org.openhab.core.types.RefreshType;
 import org.openhab.core.types.UnDefType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,9 +55,11 @@ import com.google.gson.GsonBuilder;
 public class FrigateCameraHandler extends BaseThingHandler {
     private final Logger logger = LoggerFactory.getLogger(FrigateCameraHandler.class);
 
-    private @Nullable FrigateConfiguration config;
-    private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
+    private @Nullable FrigateCameraConfiguration config;
+    private @Nullable Future<?> normalPollFuture;
+    //private static final Gson GSON = new GsonBuilder().setDateFormat("yyyy-MM-dd HH:mm:ss").create();
     private String cameraName = "";
+    private int refreshInterval = 60;
 
     public FrigateCameraHandler(Thing thing) {
         super(thing);
@@ -55,7 +69,7 @@ public class FrigateCameraHandler extends BaseThingHandler {
     public void handleCommand(ChannelUID channelUID, Command command) {
 
         if (command instanceof RefreshType) {
-            updateImage();
+            updateImage(true);
             return;
         }
         if (CHANNEL_STATE.equals(channelUID.getId())) {
@@ -74,56 +88,26 @@ public class FrigateCameraHandler extends BaseThingHandler {
 
     @Override
     public void initialize() {
-        config = getConfigAs(FrigateConfiguration.class);
-        cameraName = getConfig().get(CONFIG_CAMERA).toString();
+        config = getConfigAs(FrigateCameraConfiguration.class);
+        cameraName = config.name;
+        refreshInterval = config.imagerefresh;
         logger.debug("Thing Name: {}", cameraName);
-
-        // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly, i.e. any network access must be done in
-        // the background initialization below.
-        // Also, before leaving this method a thing status from one of ONLINE, OFFLINE or UNKNOWN must be set. This
-        // might already be the real thing status in case you can decide it directly.
-        // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
-        // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
-        // background.
-
-        // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
-        // the framework is then able to reuse the resources from the thing handler initialization.
-        // we set this upfront to reliably check status updates in unit tests.
         updateStatus(ThingStatus.UNKNOWN);
 
-        // Example for background initialization:
         scheduler.execute(() -> {
-            boolean thingReachable = updateImage(); // <background task with long running initialization here>
-            // when done do:
+            boolean thingReachable = updateImage(true); 
             if (thingReachable) {
-                FrigateServerHandler localHandler = getGatewayHandler();
-                if (localHandler != null) {
-                    String imgurl = String.format("/api/%s/latest.jpg", cameraName);
-                    updateState(CHANNEL_IMAGE_URL, new StringType(localHandler.buildBaseUrl(imgurl)));
-                    String streamurl = String.format("/api/%s", cameraName);
-                    updateState(CHANNEL_VIDEO_URL, new StringType(localHandler.buildBaseUrl(streamurl)));
-                }
-
                 updateStatus(ThingStatus.ONLINE);
+                restartPolls();
             } else {
                 updateStatus(ThingStatus.OFFLINE);
             }
         });
+    }
 
-        // These logging types should be primarily used by bindings
-        // logger.trace("Example trace message");
-        // logger.debug("Example debug message");
-        // logger.warn("Example warn message");
-        //
-        // Logging to INFO should be avoided normally.
-        // See https://www.openhab.org/docs/developer/guidelines.html#f-logging
-
-        // Note: When initialization can NOT be done set the status with more details for further
-        // analysis. See also class ThingStatusDetail for all available status details.
-        // Add a description to give user information to understand why thing does not work as expected. E.g.
-        // updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-        // "Can not access device as username and/or password are invalid");
+    @Override
+    public void dispose() {
+        stopPolls();
     }
 
     protected @Nullable FrigateServerHandler getGatewayHandler() {
@@ -131,7 +115,7 @@ public class FrigateCameraHandler extends BaseThingHandler {
         return gateway == null ? null : (FrigateServerHandler) gateway.getHandler();
     }
 
-    private boolean updateImage() {
+    private boolean updateImage(boolean updateAll) {
         FrigateServerHandler localHandler = getGatewayHandler();
         if (localHandler != null) {
             logger.debug("Camera {}: Updating image channel", cameraName);
@@ -139,15 +123,57 @@ public class FrigateCameraHandler extends BaseThingHandler {
             RawType image = localHandler.getImage(imgurl);
             if (image != null) {
                 updateState(CHANNEL_IMAGE, image);
-                updateState(CHANNEL_IMAGE_URL, new StringType(localHandler.buildBaseUrl(imgurl)));
-                String streamurl = String.format("/api/%s", cameraName);
-                updateState(CHANNEL_VIDEO_URL, new StringType(localHandler.buildBaseUrl(streamurl)));
+                if(updateAll) {
+                    updateState(CHANNEL_IMAGE_URL, new StringType(localHandler.buildBaseUrl(imgurl)));
+                    String streamurl = String.format("/api/%s", cameraName);
+                    updateState(CHANNEL_VIDEO_URL, new StringType(localHandler.buildBaseUrl(streamurl)));
+                }
                 return true;
             }
         }
         updateState(CHANNEL_IMAGE, UnDefType.UNDEF);
-        updateState(CHANNEL_IMAGE_URL, UnDefType.UNDEF);
-        updateState(CHANNEL_VIDEO_URL, UnDefType.UNDEF);
+        if(updateAll) {
+            updateState(CHANNEL_IMAGE_URL, UnDefType.UNDEF);
+            updateState(CHANNEL_VIDEO_URL, UnDefType.UNDEF);
+        }
         return false;
+    }
+    private void pollImage()
+    {
+        updateImage(false);
+    }
+
+    private synchronized void restartPolls() {
+        stopPolls();
+        normalPollFuture = scheduler.scheduleWithFixedDelay(this::pollImage, refreshInterval, refreshInterval,
+                    TimeUnit.SECONDS);        
+    }
+
+    private synchronized void stopPolls() {
+        stopFuture(normalPollFuture);
+        normalPollFuture = null;
+    }
+
+    private void stopFuture(@Nullable Future<?> future) {
+        if (future != null) {
+            future.cancel(true);
+        }
+    }
+
+    public String GetCameraName() {
+        return cameraName;
+    }
+
+    public void SetLastObject(byte[] data) {
+        RawType image = new RawType(data, "image/jpeg");
+        updateState(CHANNEL_LASTOBJECT,  image);
+    }
+
+    public void UpdateEvent (EventDTO event){
+        updateState(CHANNEL_EVENT_ID,  new StringType(event.id));
+        updateState( CHANNEL_EVENT_TYPE, new StringType(event.label));
+        updateState( CHANNEL_EVENT_SCORE , new DecimalType(event.top_score));
+        //updateState( CHANNEL_EVENT_START ,new DateTimeType(ZonedDateTime.ofInstant(event.getEnd().toInstant(), timeZoneProvider.getTimeZone())));
+        //updateState( CHANNEL_EVENT_END , new DateTimeType(event.end_time));
     }
 }

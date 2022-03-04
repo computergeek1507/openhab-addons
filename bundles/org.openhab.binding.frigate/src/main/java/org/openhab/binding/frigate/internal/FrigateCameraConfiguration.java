@@ -15,19 +15,16 @@ package org.openhab.binding.frigate.internal;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 
 /**
- * The {@link frigateConfiguration} class contains fields mapping thing configuration parameters.
+ * The {@link FrigateCameraConfiguration} class contains fields mapping thing configuration parameters.
  *
  * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
-public class FrigateConfiguration {
+public class FrigateCameraConfiguration {
 
     /**
      * Sample configuration parameters. Replace with your own.
      */
-    public String ipaddress = "";
-    public String ipAddress = "";
-    public int port = 5000;
-    public String mqttipaddress = "";
-    public int mqttport = 1883;
+    public String name = "";
+    public int imagerefresh = 30;
 }

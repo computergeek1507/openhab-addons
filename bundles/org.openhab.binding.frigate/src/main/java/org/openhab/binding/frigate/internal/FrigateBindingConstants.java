@@ -34,6 +34,12 @@ public class FrigateBindingConstants {
     public static final String CHANNEL_IMAGE = "image";
     public static final String CHANNEL_IMAGE_URL = "imageUrl";
     public static final String CHANNEL_VIDEO_URL = "videoUrl";
+    public static final String CHANNEL_LASTOBJECT = "lastobject";
+    public static final String CHANNEL_EVENT_ID = "eventId";
+    public static final String CHANNEL_EVENT_TYPE = "eventType";
+    public static final String CHANNEL_EVENT_SCORE = "eventScore";
+    public static final String CHANNEL_EVENT_START = "eventStart";
+    public static final String CHANNEL_EVENT_END = "eventEnd";
 
     // List of all Channel ids
     public static final String CHANNEL_VERSION = "frigateversion";
