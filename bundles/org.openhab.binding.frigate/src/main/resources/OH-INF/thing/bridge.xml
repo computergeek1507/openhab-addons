@@ -15,12 +15,13 @@
 			</channel>
 			<!--<channel id="detectionfps" typeId="fps">
 				<label>Detection FPS</label>
-			</channel>
-			<channel id="detectors" typeId="type">
+				</channel>
+				<channel id="detectors" typeId="type">
 				<label>Detectors</label>
 				<description>Detectors Type</description>
-			</channel>-->
+				</channel> -->
 		</channels>
+		<representation-property>ipaddress</representation-property>
 		<config-description-ref uri="thing-type:frigate:server"/>
 	</bridge-type>
 

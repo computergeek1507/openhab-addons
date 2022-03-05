@@ -14,14 +14,19 @@ package org.openhab.binding.frigate.internal.handler;
 
 import static org.openhab.binding.frigate.internal.FrigateBindingConstants.*;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.frigate.internal.FrigateCameraConfiguration;
-import org.openhab.binding.frigate.internal.dto.EventDTO;
+import org.openhab.binding.frigate.internal.dto.EventsDTO;
+import org.openhab.core.library.types.DateTimeType;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.RawType;
 import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.Bridge;
@@ -86,15 +91,13 @@ public class FrigateCameraHandler extends BaseThingHandler {
         logger.debug("Thing Name: {}", cameraName);
         updateStatus(ThingStatus.UNKNOWN);
 
-        scheduler.execute(() -> {
-            boolean thingReachable = updateImage(true);
-            if (thingReachable) {
-                updateStatus(ThingStatus.ONLINE);
-                restartPolls();
-            } else {
-                updateStatus(ThingStatus.OFFLINE);
-            }
-        });
+        boolean thingReachable = updateImage(true);
+        if (thingReachable) {
+            updateStatus(ThingStatus.ONLINE);
+            restartPolls();
+        } else {
+            updateStatus(ThingStatus.OFFLINE);
+        }
     }
 
     @Override
@@ -156,17 +159,39 @@ public class FrigateCameraHandler extends BaseThingHandler {
         return cameraName;
     }
 
-    public void SetLastObject(byte[] data) {
+    public void SetLastObject(final byte[] data) {
         RawType image = new RawType(data, "image/jpeg");
         updateState(CHANNEL_LASTOBJECT, image);
     }
 
-    public void UpdateEvent(EventDTO event) {
-        updateState(CHANNEL_EVENT_ID, new StringType(event.id));
-        updateState(CHANNEL_EVENT_TYPE, new StringType(event.label));
-        updateState(CHANNEL_EVENT_SCORE, new DecimalType(event.top_score));
-        // updateState( CHANNEL_EVENT_START ,new DateTimeType(ZonedDateTime.ofInstant(event.getEnd().toInstant(),
-        // timeZoneProvider.getTimeZone())));
-        // updateState( CHANNEL_EVENT_END , new DateTimeType(event.end_time));
+    public void UpdateEvent(final EventsDTO event) {
+        updateState(CHANNEL_EVENT_STATE, new StringType(event.type));
+        updateState(CHANNEL_EVENT_ID, new StringType(event.after.id));
+        updateState(CHANNEL_EVENT_TYPE, new StringType(event.after.label));
+        updateState(CHANNEL_EVENT_SCORE, new DecimalType(event.after.top_score));
+
+        Instant istart = Instant.ofEpochSecond(Double.valueOf(event.after.start_time).longValue());
+        ZonedDateTime zstart = ZonedDateTime.ofInstant(istart, ZoneId.systemDefault());
+        updateState(CHANNEL_EVENT_START, new DateTimeType(zstart));
+        if (Double.valueOf(event.after.end_time).longValue() != 0) {
+            Instant iend = Instant.ofEpochSecond(Double.valueOf(event.after.end_time).longValue());
+            ZonedDateTime zend = ZonedDateTime.ofInstant(iend, ZoneId.systemDefault());
+            updateState(CHANNEL_EVENT_END, new DateTimeType(zend));
+        }
+        updateState(CHANNEL_EVENT_HAS_CLIP, event.after.has_clip ? OnOffType.ON : OnOffType.OFF);
+        updateState(CHANNEL_EVENT_HAS_SNAPSHOT, event.after.has_snapshot ? OnOffType.ON : OnOffType.OFF);
+        FrigateServerHandler localHandler = getGatewayHandler();
+        if (localHandler != null) {
+            if (event.after.has_snapshot) {
+                /// api/events/<id>/snapshot.jpg
+                String eventsnapshoturl = String.format("/api/events/%s/snapshot.jpg", event.after.id);
+                updateState(CHANNEL_EVENT_SNAPSHOT_URL, new StringType(localHandler.buildBaseUrl(eventsnapshoturl)));
+            }
+            if (event.after.has_clip) {
+                // api/events/<id>/clip.mp4
+                String eventclipurl = String.format("/api/events/%s/clip.mp4", event.after.id);
+                updateState(CHANNEL_EVENT_CLIP_URL, new StringType(localHandler.buildBaseUrl(eventclipurl)));
+            }
+        }
     }
 }
