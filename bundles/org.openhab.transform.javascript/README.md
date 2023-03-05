@@ -5,7 +5,7 @@ Transform an input to an output using JavaScript.
 It expects the transformation rule to be read from a file which is stored under the `transform` folder. 
 To organize the various transformations, one should use subfolders.
 
-Simple transformation rules can also be given as a inline script.
+Simple transformation rules can also be given as an inline script.
 Inline script should be start by `|` character following the JavaScript.
 Beware that complex inline script could cause issues to e.g. item file parsing.
 
@@ -24,7 +24,7 @@ transform/getValue.js:
 
 JavaScript transformation syntax also support additional parameters which can be passed to the script. 
 This can prevent redundancy when transformation is needed for several use cases, but with small adaptations.
-additional parameters can be passed to the script via [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) query syntax.
+Additional parameters can be passed to the script via [URI](https://en.wikipedia.org/wiki/Uniform_Resource_Identifier) query syntax.
 
 As `input` name is reserved for transformed data, it can't be used in query parameters. 
 Also `?` and `&` characters are reserved, but if they need to passed as additional data, they can be escaped according to URI syntax.

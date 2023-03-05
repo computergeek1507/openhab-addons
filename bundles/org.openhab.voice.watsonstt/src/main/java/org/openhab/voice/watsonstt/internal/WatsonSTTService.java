@@ -22,8 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import javax.net.ssl.SSLPeerUnverifiedException;
+import java.util.stream.Stream;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -47,6 +46,7 @@ import org.osgi.service.component.annotations.Modified;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.gson.JsonObject;
 import com.ibm.cloud.sdk.core.http.HttpMediaType;
 import com.ibm.cloud.sdk.core.security.IamAuthenticator;
 import com.ibm.watson.speech_to_text.v1.SpeechToText;
@@ -70,23 +70,39 @@ import okhttp3.WebSocket;
 public class WatsonSTTService implements STTService {
     private final Logger logger = LoggerFactory.getLogger(WatsonSTTService.class);
     private final ScheduledExecutorService executor = ThreadPoolManager.getScheduledPool("OH-voice-watsonstt");
-    private final List<String> models = List.of("ar-AR_BroadbandModel", "de-DE_BroadbandModel", "en-AU_BroadbandModel",
-            "en-GB_BroadbandModel", "en-US_BroadbandModel", "es-AR_BroadbandModel", "es-CL_BroadbandModel",
-            "es-CO_BroadbandModel", "es-ES_BroadbandModel", "es-MX_BroadbandModel", "es-PE_BroadbandModel",
-            "fr-CA_BroadbandModel", "fr-FR_BroadbandModel", "it-IT_BroadbandModel", "ja-JP_BroadbandModel",
-            "ko-KR_BroadbandModel", "nl-NL_BroadbandModel", "pt-BR_BroadbandModel", "zh-CN_BroadbandModel");
-    private final Set<Locale> supportedLocales = models.stream().map(name -> name.split("_")[0])
-            .map(Locale::forLanguageTag).collect(Collectors.toSet());
+    private final List<String> telephonyModels = List.of("ar-MS_Telephony", "zh-CN_Telephony", "nl-BE_Telephony",
+            "nl-NL_Telephony", "en-AU_Telephony", "en-IN_Telephony", "en-GB_Telephony", "en-US_Telephony",
+            "fr-CA_Telephony", "fr-FR_Telephony", "hi-IN_Telephony", "pt-BR_Telephony", "es-ES_Telephony");
+    private final List<String> multimediaModels = List.of("en-AU_Multimedia", "en-GB_Multimedia", "en-US_Multimedia",
+            "fr-FR_Multimedia", "de-DE_Multimedia", "it-IT_Multimedia", "ja-JP_Multimedia", "ko-KR_Multimedia",
+            "pt-BR_Multimedia", "es-ES_Multimedia");
+    // model 'en-WW_Medical_Telephony' and 'es-LA_Telephony' will be used as fallbacks for es and en
+    private final List<Locale> fallbackLocales = List.of(Locale.forLanguageTag("es"), Locale.ENGLISH);
+    private final Set<Locale> supportedLocales = Stream
+            .concat(Stream.concat(telephonyModels.stream(), multimediaModels.stream()).map(name -> name.split("_")[0])
+                    .distinct().map(Locale::forLanguageTag), fallbackLocales.stream())
+            .collect(Collectors.toSet());
     private WatsonSTTConfiguration config = new WatsonSTTConfiguration();
+    private @Nullable SpeechToText speechToText = null;
 
     @Activate
     protected void activate(Map<String, Object> config) {
-        this.config = new Configuration(config).as(WatsonSTTConfiguration.class);
+        modified(config);
     }
 
     @Modified
     protected void modified(Map<String, Object> config) {
         this.config = new Configuration(config).as(WatsonSTTConfiguration.class);
+        if (this.config.apiKey.isBlank() || this.config.instanceUrl.isBlank()) {
+            this.speechToText = null;
+        } else {
+            var speechToText = new SpeechToText(new IamAuthenticator.Builder().apikey(this.config.apiKey).build());
+            speechToText.setServiceUrl(this.config.instanceUrl);
+            if (this.config.optOutLogging) {
+                speechToText.setDefaultHeaders(Map.of("X-Watson-Learning-Opt-Out", "1"));
+            }
+            this.speechToText = speechToText;
+        }
     }
 
     @Override
@@ -113,7 +129,8 @@ public class WatsonSTTService implements STTService {
     @Override
     public STTServiceHandle recognize(STTListener sttListener, AudioStream audioStream, Locale locale, Set<String> set)
             throws STTException {
-        if (config.apiKey.isBlank() || config.instanceUrl.isBlank()) {
+        var stt = this.speechToText;
+        if (stt == null) {
             throw new STTException("service is not correctly configured");
         }
         String contentType = getContentType(audioStream);
@@ -121,40 +138,17 @@ public class WatsonSTTService implements STTService {
             throw new STTException("Unsupported format, unable to resolve audio content type");
         }
         logger.debug("Content-Type: {}", contentType);
-        var speechToText = new SpeechToText(new IamAuthenticator.Builder().apikey(config.apiKey).build());
-        speechToText.setServiceUrl(config.instanceUrl);
-        if (config.optOutLogging) {
-            speechToText.setDefaultHeaders(Map.of("X-Watson-Learning-Opt-Out", "1"));
-        }
         RecognizeWithWebsocketsOptions wsOptions = new RecognizeWithWebsocketsOptions.Builder().audio(audioStream)
                 .contentType(contentType).redaction(config.redaction).smartFormatting(config.smartFormatting)
-                .model(locale.toLanguageTag() + "_BroadbandModel").interimResults(true)
+                .model(getModel(locale)).interimResults(true)
                 .backgroundAudioSuppression(config.backgroundAudioSuppression)
-                .speechDetectorSensitivity(config.speechDetectorSensitivity).inactivityTimeout(config.inactivityTimeout)
+                .speechDetectorSensitivity(config.speechDetectorSensitivity).inactivityTimeout(config.maxSilenceSeconds)
                 .build();
         final AtomicReference<@Nullable WebSocket> socketRef = new AtomicReference<>();
         final AtomicBoolean aborted = new AtomicBoolean(false);
         executor.submit(() -> {
-            int retries = 2;
-            while (retries > 0) {
-                try {
-                    socketRef.set(speechToText.recognizeUsingWebSocket(wsOptions,
-                            new TranscriptionListener(sttListener, config, aborted)));
-                    break;
-                } catch (RuntimeException e) {
-                    var cause = e.getCause();
-                    if (cause instanceof SSLPeerUnverifiedException) {
-                        logger.debug("Retrying on error: {}", cause.getMessage());
-                        retries--;
-                    } else {
-                        var errorMessage = e.getMessage();
-                        logger.warn("Aborting on error: {}", errorMessage);
-                        sttListener.sttEventReceived(
-                                new SpeechRecognitionErrorEvent(errorMessage != null ? errorMessage : "Unknown error"));
-                        break;
-                    }
-                }
-            }
+            socketRef.set(stt.recognizeUsingWebSocket(wsOptions,
+                    new TranscriptionListener(socketRef, sttListener, config, aborted)));
         });
         return new STTServiceHandle() {
             @Override
@@ -162,16 +156,38 @@ public class WatsonSTTService implements STTService {
                 if (!aborted.getAndSet(true)) {
                     var socket = socketRef.get();
                     if (socket != null) {
-                        socket.close(1000, null);
-                        socket.cancel();
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException ignored) {
-                        }
+                        sendStopMessage(socket);
                     }
                 }
             }
         };
+    }
+
+    private String getModel(Locale locale) throws STTException {
+        String languageTag = locale.toLanguageTag();
+        Stream<String> allModels;
+        if (config.preferMultimediaModel) {
+            allModels = Stream.concat(multimediaModels.stream(), telephonyModels.stream());
+        } else {
+            allModels = Stream.concat(telephonyModels.stream(), multimediaModels.stream());
+        }
+        var modelOption = allModels.filter(model -> model.startsWith(languageTag)).findFirst();
+        if (modelOption.isEmpty()) {
+            if ("es".equals(locale.getLanguage())) {
+                // fallback for latin american spanish languages
+                var model = "es-LA_Telephony";
+                logger.debug("Falling back to model: {}", model);
+            }
+            if ("en".equals(locale.getLanguage())) {
+                // fallback english dialects
+                var model = "en-WW_Medical_Telephony";
+                logger.debug("Falling back to model: {}", model);
+            }
+            throw new STTException("No compatible model for language " + languageTag);
+        }
+        var model = modelOption.get();
+        logger.debug("Using model: {}", model);
+        return model;
     }
 
     private @Nullable String getContentType(AudioStream audioStream) throws STTException {
@@ -224,17 +240,26 @@ public class WatsonSTTService implements STTService {
         return null;
     }
 
+    private static void sendStopMessage(WebSocket ws) {
+        JsonObject stopMessage = new JsonObject();
+        stopMessage.addProperty("action", "stop");
+        ws.send(stopMessage.toString());
+    }
+
     private static class TranscriptionListener implements RecognizeCallback {
         private final Logger logger = LoggerFactory.getLogger(TranscriptionListener.class);
         private final StringBuilder transcriptBuilder = new StringBuilder();
         private final STTListener sttListener;
         private final WatsonSTTConfiguration config;
         private final AtomicBoolean aborted;
+        private final AtomicReference<@Nullable WebSocket> socketRef;
         private float confidenceSum = 0f;
         private int responseCount = 0;
         private boolean disconnected = false;
 
-        public TranscriptionListener(STTListener sttListener, WatsonSTTConfiguration config, AtomicBoolean aborted) {
+        public TranscriptionListener(AtomicReference<@Nullable WebSocket> socketRef, STTListener sttListener,
+                WatsonSTTConfiguration config, AtomicBoolean aborted) {
+            this.socketRef = socketRef;
             this.sttListener = sttListener;
             this.config = config;
             this.aborted = aborted;
@@ -256,6 +281,12 @@ public class WatsonSTTService implements STTService {
                 transcriptBuilder.append(alternative.getTranscript());
                 confidenceSum += confidence != null ? confidence.floatValue() : 0f;
                 responseCount++;
+                if (config.singleUtteranceMode) {
+                    var socket = socketRef.get();
+                    if (socket != null) {
+                        sendStopMessage(socket);
+                    }
+                }
             });
         }
 
@@ -272,7 +303,7 @@ public class WatsonSTTService implements STTService {
                 return;
             }
             logger.warn("TranscriptionError: {}", errorMessage);
-            if (!aborted.get()) {
+            if (!aborted.getAndSet(true)) {
                 sttListener.sttEventReceived(
                         new SpeechRecognitionErrorEvent(errorMessage != null ? errorMessage : "Unknown error"));
             }
@@ -285,7 +316,7 @@ public class WatsonSTTService implements STTService {
             if (!aborted.getAndSet(true)) {
                 sttListener.sttEventReceived(new RecognitionStopEvent());
                 float averageConfidence = confidenceSum / (float) responseCount;
-                String transcript = transcriptBuilder.toString();
+                String transcript = transcriptBuilder.toString().trim();
                 if (!transcript.isBlank()) {
                     sttListener.sttEventReceived(new SpeechRecognitionEvent(transcript, averageConfidence));
                 } else {

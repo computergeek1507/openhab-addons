@@ -12,12 +12,17 @@
  */
 package org.openhab.binding.mqtt.homeassistant.internal.exception;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
 /**
  * Exception class for errors in HomeAssistant components configurations
  *
  * @author Anton Kharuzhy - Initial contribution
  */
+@NonNullByDefault
 public class ConfigurationException extends RuntimeException {
+    private static final long serialVersionUID = -4828651603869498942L;
+
     public ConfigurationException(String message) {
         super(message);
     }

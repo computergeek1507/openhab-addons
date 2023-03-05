@@ -12,6 +12,7 @@
  */
 package org.openhab.binding.homematic.internal.model;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.openhab.binding.homematic.internal.misc.MiscUtils;
 
 /**
@@ -131,7 +132,7 @@ public class HmDatapoint implements Cloneable {
     }
 
     /**
-     * Returns the index of the value in a option list.
+     * Returns the index of the value in an option list.
      */
     public int getOptionIndex(String option) {
         if (options != null && option != null) {
@@ -146,21 +147,34 @@ public class HmDatapoint implements Cloneable {
     }
 
     /**
-     * Returns the value of a option list.
+     * Returns the value of an option list.
      */
-    public String getOptionValue() {
-        if (options != null && value != null) {
-            int idx = 0;
-            if (value instanceof Integer) {
-                idx = (int) value;
-            } else {
-                idx = Integer.parseInt(value.toString());
-            }
-            if (idx < options.length) {
-                return options[idx];
-            }
+    public @Nullable String getOptionValue() {
+        Integer idx = getIntegerValue();
+        if (options != null && idx != null && idx < options.length) {
+            return options[idx];
         }
         return null;
+    }
+
+    public @Nullable Integer getIntegerValue() {
+        if (value instanceof Integer) {
+            return (int) value;
+        } else if (value != null) {
+            return Integer.parseInt(value.toString());
+        } else {
+            return null;
+        }
+    }
+
+    public @Nullable Double getDoubleValue() {
+        if (value instanceof Double) {
+            return (double) value;
+        } else if (value != null) {
+            return Double.parseDouble(value.toString());
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -304,7 +318,7 @@ public class HmDatapoint implements Cloneable {
     }
 
     /**
-     * Returns true, if the datapoint is a action.
+     * Returns true, if the datapoint is an action.
      */
     public boolean isActionType() {
         return type == HmValueType.ACTION;
@@ -325,7 +339,7 @@ public class HmDatapoint implements Cloneable {
     }
 
     /**
-     * Returns true, if the datapoint is a integer.
+     * Returns true, if the datapoint is an integer.
      */
     public boolean isIntegerType() {
         return type == HmValueType.INTEGER;
@@ -346,7 +360,7 @@ public class HmDatapoint implements Cloneable {
     }
 
     /**
-     * Returns true, if the datapoint is a enum.
+     * Returns true, if the datapoint is an enum.
      */
     public boolean isEnumType() {
         return type == HmValueType.ENUM;

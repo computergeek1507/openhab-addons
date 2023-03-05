@@ -54,9 +54,6 @@ public class OrbitBhyveDevice {
 
     JsonObject location = new JsonObject();
 
-    @SerializedName("restricted_frequency")
-    JsonObject restrictedFrequency = new JsonObject();
-
     @SerializedName("suggested_start_time")
     String suggestedStartTime = "";
 
@@ -64,9 +61,6 @@ public class OrbitBhyveDevice {
 
     @SerializedName("water_sense_mode")
     String waterSenseMode = "";
-
-    @SerializedName("wifi_version")
-    int wifiVersion = 0;
 
     public String getName() {
         return name;

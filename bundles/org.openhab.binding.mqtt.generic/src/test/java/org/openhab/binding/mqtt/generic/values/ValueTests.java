@@ -17,7 +17,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.junit.jupiter.api.Test;
 import org.openhab.binding.mqtt.generic.mapping.ColorMode;
 import org.openhab.core.library.types.DecimalType;
@@ -44,9 +46,10 @@ import org.openhab.core.types.TypeParser;
  *
  * @author David Graeff - Initial contribution
  */
+@NonNullByDefault
 public class ValueTests {
-    Command p(Value v, String str) {
-        return TypeParser.parseCommand(v.getSupportedCommandTypes(), str);
+    private Command p(Value v, String str) {
+        return Objects.requireNonNull(TypeParser.parseCommand(v.getSupportedCommandTypes(), str));
     }
 
     @Test
@@ -179,6 +182,14 @@ public class ValueTests {
         v.update(new QuantityType<>("20"));
         assertThat(v.getMQTTpublishValue(null), is("20"));
         assertThat(v.getChannelState(), is(new QuantityType<>(20, Units.WATT)));
+    }
+
+    @Test
+    public void numberUpdateMireds() {
+        NumberValue v = new NumberValue(null, null, new BigDecimal(10), Units.MIRED);
+
+        v.update(new QuantityType<>(2700, Units.KELVIN));
+        assertThat(v.getMQTTpublishValue("%.0f"), is("370"));
     }
 
     @Test

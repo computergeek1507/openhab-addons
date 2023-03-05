@@ -22,6 +22,12 @@
 			<label>Instance Url</label>
 			<description>Url for Speech-to-Text instance created on IBM Cloud.</description>
 		</parameter>
+		<parameter name="preferMultimediaModel" type="boolean" groupName="stt">
+			<label>Prefer Multimedia Model</label>
+			<description>Prefer multimedia to telephony models. Multimedia models are intended for audio that has a minimum
+				sampling rate of 16 kHz, while telephony models are intended for audio that has a minimum sampling rate of 8 kHz.</description>
+			<default>true</default>
+		</parameter>
 		<parameter name="backgroundAudioSuppression" type="decimal" min="0" max="1" step="0.1" groupName="stt">
 			<label>Background Audio Suppression</label>
 			<description>Use the parameter to suppress side conversations or background noise.</description>
@@ -32,8 +38,8 @@
 			<description>Use the parameter to suppress word insertions from music, coughing, and other non-speech events.</description>
 			<default>0.5</default>
 		</parameter>
-		<parameter name="inactivityTimeout" type="integer" unit="s" groupName="stt">
-			<label>Inactivity Timeout</label>
+		<parameter name="maxSilenceSeconds" type="integer" unit="s" groupName="stt">
+			<label>Max Silence Seconds</label>
 			<description>The time in seconds after which, if only silence (no speech) is detected in the audio, the connection is
 				closed.</description>
 			<default>3</default>
@@ -42,6 +48,11 @@
 			<label>No Results Message</label>
 			<description>Message to be told when no transcription is done.</description>
 			<default>No results</default>
+		</parameter>
+		<parameter name="singleUtteranceMode" type="boolean" groupName="stt">
+			<label>Single Utterance Mode</label>
+			<description>When enabled recognition stops listening after a single utterance.</description>
+			<default>true</default>
 		</parameter>
 		<parameter name="optOutLogging" type="boolean" groupName="stt">
 			<label>Opt Out Logging</label>

@@ -4,55 +4,30 @@ This binding adds support to control Tapo (Copyright © TP-Link Corporation Limi
 
 ## Supported Things
 
-The following Tapo-Devices are supported
+The following Tapo-Devices are supported. For precise channel-description look at `channels-table` below
 
-### P100/P105 SmartPlug (WiFi)
-
-* Power On/Off
-* Wi-Fi signal (SignalStrength)
-* On-Time (Time in seconds device is switched on)
-
-### P110 EnergyMonitoring SmartPlug (WiFi)
-
-* Power On/Off
-* Wi-Fi signal (SignalStrength)
-* On-Time (Time in seconds device is switched on)
-* actual PowerUsage (Watt)
-* today EnergyUsage (Wh)
-* today Runtime (Time in seconds device was on today)
-
-### L510(Series) dimmable SmartBulb (WiFi)
-
-* Light On/Off
-* Brightnes (Dimmer)  0-100 %
-* ColorTemperature (Number) 2500-6500 K
-* Wi-Fi signal (SignalStrength)
-* On-Time (Time in seconds device is switched on)
-
-### L530(Series) MultiColor SmartBulb (WiFi)
-
-* Light On/Off
-* Brightnes (Dimmer)  0-100 %
-* ColorTemperature (Number) 2500-6500 K
-* Color (Color)
-* Wi-Fi signal (SignalStrength)
-* On-Time (Time in seconds device is switched on)
-
-### L900/L920 LED-LightStrip (WiFi)
-
-* Light On/Off
-* Brightnes (Dimmer)  0-100 %
-* ColorTemperature (Number) 2500-6500 K
-* Color (Color)
-* Wi-Fi signal (SignalStrength)
-* On-Time (Time in seconds device is switched on)
-
+| DeviceType                         | ThingType   | Description                                 |
+|------------------------------------|-------------|---------------------------------------------|
+| SmartPlug (Wi-Fi)                  | P100        | Smart Socket                                |
+|                                    | P105        | Smart Mini Socket                           |
+| EnergyMonitoring SmartPlug (Wi-Fi) | P110        | Energy Monitoring Smart Socket              |
+|                                    | P115        | Energy Monitoring Mini Smart Socket         |
+| Dimmable SmartBulb (Wi-Fi)         | L510        | Dimmable White-Light Smart-Bulb (E27)       |
+|                                    | L610        | Dimmable White-Light Smart-Spot (GU10)      |
+| MultiColor SmartBulb (Wi-Fi)       | L530        | Multicolor Smart-Bulb (E27)                 |
+|                                    | L630        | Multicolor Smart-Spot (GU10)                |
+| MultiColor LightStrip (Wi-Fi)      | L900        | Multicolor RGB Dimmable LightStrip (5m)     |
+|                                    | L920        | Multicolor RGB-IC ColorZone LightStrip (5m) |
+|                                    | L930        | Multicolor RGBW-IC 50-Zone LightStrip (5m)  |
 
 ## Prerequisites
 
 Before using Smart Plugs with openHAB the devices must be connected to the Wi-Fi network.
 This can be done using the Tapo provided mobile app.
 You need to setup a bridge (Cloud-Login) to commiunicate with your devices.
+
+**Note:** If the Tapo device is to be isolated from the internet e.g. on an IoT LAN, the P110 will not expose its energy and power data until it has successfully synchronised it's clock with an NTP server - at time of writing, this was `pool.ntp.org`.
+To satisfy this requirement while keeping the device isolated, your router should be configured to either permit `udp/123` out to the internet or a NAT rule created to redirect all internet bound NTP traffic to a local NTP server.
 
 ## Discovery
 
@@ -88,17 +63,17 @@ The thing has the following configuration parameters:
 
 All devices support some of the following channels:
 
-| group     | channel          |type                    | description                  | things supporting this channel              |
-|-----------|----------------- |------------------------|------------------------------|---------------------------------------------|
-| actuator  | output           | Switch                 | Power device on or off       | P100, P105, P110, L510, L530, L900, L920    |
-|           | brightness       | Dimmer                 | Brightness 0-100%            | L510, L530, L900                            |
-|           | colorTemperature | Number                 | White-Color-Temp 2500-6500K  | L510, L530, L900                            |
-|           | color            | Color                  | Color                        | L530, L900                                  |
-| device    | wifiSignal       | system.signal-strength | WiFi-quality-level           | P100, P105, P110, L510, L530, L900, L920    |
-|           | onTime           | Number:Time            | seconds output is on         | P100, P105, P110, L510, L530, L900, L920    |
-| energy    | actualPower      | Number:Power           | actual Power (Watt)          | P110                                        |
-|           | todayEnergyUsage | Number:Energy          | used energy today (Wh)       | P110                                        |
-|           | todayRuntime      | Number:Time            | seconds output was on today  | P110                                        |
+| group     | channel          | type                   | description                  | things supporting this channel                                   |
+|-----------|----------------- |------------------------|------------------------------|------------------------------------------------------------------|
+| actuator  | output           | Switch                 | Power device on or off       | P100, P105, P110, P115, L510, L530, L610, L630, L900, L920, L930 |
+|           | brightness       | Dimmer                 | Brightness 0-100%            | L510, L530, L610, L630, L900                                     |
+|           | colorTemperature | Number                 | White-Color-Temp 2500-6500K  | L510, L530, L610, L630, L900                                     |
+|           | color            | Color                  | Color                        | L530, L630, L900                                                 |
+| device    | wifiSignal       | Number                 | WiFi-quality-level           | P100, P105, P110, P115, L510, L530, L610, L630, L900, L920, L930 |
+|           | onTime           | Number:Time            | seconds output is on         | P100, P105, P110, P115, L510, L530, L900, L920, L930             |
+| energy    | actualPower      | Number:Power           | actual Power (Watt)          | P110, P115                                                       |
+|           | todayEnergyUsage | Number:Energy          | used energy today (Wh)       | P110, P115                                                       |
+|           | todayRuntime     | Number:Time            | seconds output was on today  | P110, P115                                                       |
 
 
 ## Channel Refresh

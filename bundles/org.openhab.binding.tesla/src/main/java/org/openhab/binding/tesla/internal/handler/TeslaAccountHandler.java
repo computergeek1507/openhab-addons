@@ -14,12 +14,9 @@ package org.openhab.binding.tesla.internal.handler;
 
 import static org.openhab.binding.tesla.internal.TeslaBindingConstants.*;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -30,20 +27,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientRequestContext;
-import javax.ws.rs.client.ClientRequestFilter;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.openhab.binding.tesla.internal.TeslaBindingConstants;
 import org.openhab.binding.tesla.internal.discovery.TeslaVehicleDiscoveryService;
 import org.openhab.binding.tesla.internal.protocol.Vehicle;
 import org.openhab.binding.tesla.internal.protocol.VehicleConfig;
 import org.openhab.binding.tesla.internal.protocol.sso.TokenResponse;
-import org.openhab.core.config.core.Configuration;
 import org.openhab.core.io.net.http.HttpClientFactory;
 import org.openhab.core.thing.Bridge;
 import org.openhab.core.thing.ChannelUID;
@@ -118,7 +110,7 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
 
     @Override
     public void initialize() {
-        logger.trace("Initializing the Tesla account handler for {}", this.getStorageKey());
+        logger.debug("Initializing the Tesla account handler for {}", this.getStorageKey());
 
         updateStatus(ThingStatus.UNKNOWN);
 
@@ -137,7 +129,7 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
 
     @Override
     public void dispose() {
-        logger.trace("Disposing the Tesla account handler for {}", getThing().getUID());
+        logger.debug("Disposing the Tesla account handler for {}", getThing().getUID());
 
         lock.lock();
         try {
@@ -175,9 +167,19 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
         }
     }
 
+    public String getAccessToken() {
+        return logonToken.access_token;
+    }
+
     protected boolean checkResponse(Response response, boolean immediatelyFail) {
         if (response != null && response.getStatus() == 200) {
             return true;
+        } else if (response != null && response.getStatus() == 401) {
+            logger.debug("The access token has expired, trying to get a new one.");
+            ThingStatusInfo authenticationResult = authenticate();
+            updateStatus(authenticationResult.getStatus(), authenticationResult.getStatusDetail(),
+                    authenticationResult.getDescription());
+            return false;
         } else {
             apiIntervalErrors++;
             if (immediatelyFail || apiIntervalErrors >= API_MAXIMUM_ERRORS_IN_INTERVAL) {
@@ -186,8 +188,8 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
                 } else {
                     logger.warn("Reached the maximum number of errors ({}) for the current interval ({} seconds)",
                             API_MAXIMUM_ERRORS_IN_INTERVAL, API_ERROR_INTERVAL_SECONDS);
+                    apiIntervalErrors = 0;
                 }
-
                 updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR);
             } else if ((System.currentTimeMillis() - apiIntervalTimestamp) > 1000 * API_ERROR_INTERVAL_SECONDS) {
                 logger.trace("Resetting the error counter. ({} errors in the last interval)", apiIntervalErrors);
@@ -211,7 +213,7 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
                     response.getStatusInfo().getReasonPhrase());
 
             if (!checkResponse(response, true)) {
-                logger.error("An error occurred while querying the vehicle");
+                logger.debug("An error occurred while querying the vehicle");
                 return null;
             }
 
@@ -250,52 +252,33 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
         return this.getThing().getUID().getId();
     }
 
-    private ThingStatusInfo authenticate() {
+    ThingStatusInfo authenticate() {
         TokenResponse token = logonToken;
 
         boolean hasExpired = true;
+        logger.debug("Current authentication time {}", dateFormatter.format(Instant.now()));
 
         if (token != null) {
             Instant tokenCreationInstant = Instant.ofEpochMilli(token.created_at * 1000);
-            logger.debug("Found a request token created at {}", dateFormatter.format(tokenCreationInstant));
-            Instant tokenExpiresInstant = Instant.ofEpochMilli(token.created_at * 1000 + 60 * token.expires_in);
+            Instant tokenExpiresInstant = Instant.ofEpochMilli((token.created_at + token.expires_in) * 1000);
+            logger.debug("Found a request token from {}", dateFormatter.format(tokenCreationInstant));
+            logger.debug("Access token expiration time {}", dateFormatter.format(tokenExpiresInstant));
 
             if (tokenExpiresInstant.isBefore(Instant.now())) {
-                logger.debug("The token has expired at {}", dateFormatter.format(tokenExpiresInstant));
+                logger.debug("The access token has expired");
                 hasExpired = true;
             } else {
+                logger.debug("The access token has not expired yet");
                 hasExpired = false;
             }
         }
 
         if (hasExpired) {
-            String username = (String) getConfig().get(CONFIG_USERNAME);
-            String password = (String) getConfig().get(CONFIG_PASSWORD);
             String refreshToken = (String) getConfig().get(CONFIG_REFRESHTOKEN);
 
             if (refreshToken == null || refreshToken.isEmpty()) {
-                if (username != null && !username.isEmpty() && password != null && !password.isEmpty()) {
-                    try {
-                        refreshToken = ssoHandler.authenticate(username, password);
-                    } catch (Exception e) {
-                        logger.error("An exception occurred while obtaining refresh token with username/password: '{}'",
-                                e.getMessage());
-                    }
-
-                    if (refreshToken != null) {
-                        // store refresh token from SSO endpoint in config, clear the password
-                        Configuration cfg = editConfiguration();
-                        cfg.put(TeslaBindingConstants.CONFIG_REFRESHTOKEN, refreshToken);
-                        cfg.remove(TeslaBindingConstants.CONFIG_PASSWORD);
-                        updateConfiguration(cfg);
-                    } else {
-                        return new ThingStatusInfo(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                                "Failed to obtain refresh token with username/password.");
-                    }
-                } else {
-                    return new ThingStatusInfo(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
-                            "Neither a refresh token nor credentials are provided.");
-                }
+                return new ThingStatusInfo(ThingStatus.OFFLINE, ThingStatusDetail.CONFIGURATION_ERROR,
+                        "No refresh token is provided.");
             }
 
             this.logonToken = ssoHandler.getAccessToken(refreshToken);
@@ -431,28 +414,6 @@ public class TeslaAccountHandler extends BaseBridgeHandler {
             lock.unlock();
         }
     };
-
-    public static class Authenticator implements ClientRequestFilter {
-        private final String user;
-        private final String password;
-
-        public Authenticator(String user, String password) {
-            this.user = user;
-            this.password = password;
-        }
-
-        @Override
-        public void filter(ClientRequestContext requestContext) throws IOException {
-            MultivaluedMap<String, Object> headers = requestContext.getHeaders();
-            final String basicAuthentication = getBasicAuthentication();
-            headers.add("Authorization", basicAuthentication);
-        }
-
-        private String getBasicAuthentication() {
-            String token = this.user + ":" + this.password;
-            return "Basic " + Base64.getEncoder().encodeToString(token.getBytes(StandardCharsets.UTF_8));
-        }
-    }
 
     protected class Request implements Runnable {
 

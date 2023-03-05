@@ -56,7 +56,7 @@ public class SensorState {
     public @Nullable Boolean carbonmonoxide;
     /** airquality sensors provide a string value. */
     public @Nullable String airquality;
-    /** airquality sensors provide a integer value. */
+    /** airquality sensors provide an integer value. */
     public @Nullable Integer airqualityppb;
     /** Pressure sensors provide a hPa value. */
     public @Nullable Integer pressure;
@@ -66,6 +66,11 @@ public class SensorState {
     public @Nullable Float power;
     /** Batttery sensors provide this value */
     public @Nullable Integer battery;
+    /**
+     * Some battery sensors (especially Tuya driven devices) provide this boolean
+     * instead of battery level
+     */
+    public @Nullable Boolean lowbattery;
     /** Consumption sensors provide this value in Watts/hour. */
     public @Nullable Float consumption;
     /** Power sensors provide this value in Volt. */

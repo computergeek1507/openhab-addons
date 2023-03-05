@@ -13,8 +13,7 @@
 package org.openhab.binding.mqtt.generic.values;
 
 import java.math.BigDecimal;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 import javax.measure.Unit;
 
@@ -53,8 +52,7 @@ public class NumberValue extends Value {
 
     public NumberValue(@Nullable BigDecimal min, @Nullable BigDecimal max, @Nullable BigDecimal step,
             @Nullable Unit<?> unit) {
-        super(CoreItemFactory.NUMBER, Stream.of(QuantityType.class, IncreaseDecreaseType.class, UpDownType.class)
-                .collect(Collectors.toList()));
+        super(CoreItemFactory.NUMBER, List.of(QuantityType.class, IncreaseDecreaseType.class, UpDownType.class));
         this.min = min;
         this.max = max;
         this.step = step == null ? BigDecimal.ONE : step;
@@ -132,7 +130,7 @@ public class NumberValue extends Value {
     private BigDecimal getQuantityTypeAsDecimal(QuantityType<?> qType) {
         BigDecimal val = qType.toBigDecimal();
         if (!qType.getUnit().isCompatible(Units.ONE)) {
-            QuantityType<?> convertedType = qType.toUnit(unit);
+            QuantityType<?> convertedType = qType.toInvertibleUnit(unit);
             if (convertedType != null) {
                 val = convertedType.toBigDecimal();
             }
@@ -151,6 +149,11 @@ public class NumberValue extends Value {
         if (min != null) {
             builder = builder.withMinimum(min);
         }
-        return builder.withStep(step).withPattern("%s %unit%");
+        if (!unit.equals(Units.ONE)) {
+            builder.withPattern("%s " + unit);
+        } else {
+            builder.withPattern("%s %unit%");
+        }
+        return builder.withStep(step);
     }
 }

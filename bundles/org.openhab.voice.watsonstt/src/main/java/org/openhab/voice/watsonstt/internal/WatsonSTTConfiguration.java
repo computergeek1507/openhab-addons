@@ -31,6 +31,11 @@ public class WatsonSTTConfiguration {
      */
     public String instanceUrl = "";
     /**
+     * Prefer multimedia to telephony models. Multimedia models are intended for audio that has a minimum sampling rate
+     * of 16 kHz, while telephony models are intended for audio that has a minimum sampling rate of 8 kHz.
+     */
+    public boolean preferMultimediaModel = true;
+    /**
      * Use the parameter to suppress side conversations or background noise.
      */
     public float backgroundAudioSuppression = 0f;
@@ -48,9 +53,13 @@ public class WatsonSTTConfiguration {
      */
     public boolean redaction = false;
     /**
-     * The time in seconds after which, if only silence (no speech) is detected in the audio, the connection is closed.
+     * Single phrase mode.
      */
-    public int inactivityTimeout = 3;
+    public boolean singleUtteranceMode = true;
+    /**
+     * max seconds without getting new transcriptions to stop listening.
+     */
+    public int maxSilenceSeconds = 3;
     /**
      * Message to be told when no results
      */
