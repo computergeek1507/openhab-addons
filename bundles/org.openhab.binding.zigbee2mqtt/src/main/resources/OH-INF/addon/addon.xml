@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon:addon id="zigbee2mqtt" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:addon="https://openhab.org/schemas/addon/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/addon/v1.0.0 https://openhab.org/schemas/addon-1.0.0.xsd">
+
+	<type>binding</type>
+	<name>Zigbee2MQTT Binding</name>
+	<description>Integrates Zigbee devices via a local Zigbee2MQTT installation. Reads device states and sends
+		commands over
+		MQTT. Supports lights, sensors, plugs, and any device managed by Zigbee2MQTT.</description>
+	<connection>local</connection>
+
+</addon:addon>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config-description:config-descriptions
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:config-description="https://openhab.org/schemas/config-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/config-description/v1.0.0 https://openhab.org/schemas/config-description-1.0.0.xsd">
+
+	<!-- Bridge: MQTT broker + Zigbee2MQTT connection -->
+	<config-description uri="thing-type:zigbee2mqtt:bridge">
+		<parameter name="host" type="text" required="true">
+			<label>MQTT Broker Hostname / IP</label>
+			<description>Hostname or IP address of the MQTT broker (e.g. the machine running Zigbee2MQTT).</description>
+			<context>network-address</context>
+		</parameter>
+		<parameter name="port" type="integer" min="1" max="65535">
+			<label>MQTT Broker Port</label>
+			<description>TCP port of the MQTT broker.</description>
+			<default>1883</default>
+		</parameter>
+		<parameter name="username" type="text">
+			<label>Username</label>
+			<description>MQTT broker username. Leave empty if the broker does not require authentication.</description>
+		</parameter>
+		<parameter name="password" type="text">
+			<label>Password</label>
+			<description>MQTT broker password.</description>
+			<context>password</context>
+		</parameter>
+		<parameter name="baseTopic" type="text">
+			<label>Base Topic</label>
+			<description>The base MQTT topic Zigbee2MQTT publishes to. Must match the Zigbee2MQTT configuration.</description>
+			<default>zigbee2mqtt</default>
+		</parameter>
+		<parameter name="secure" type="boolean">
+			<label>TLS / SSL</label>
+			<description>Enable TLS encryption for the MQTT connection.</description>
+			<default>false</default>
+		</parameter>
+		<parameter name="keepAlive" type="integer" min="10" max="600" unit="s">
+			<label>Keep-Alive Interval</label>
+			<description>MQTT keep-alive interval in seconds.</description>
+			<default>60</default>
+			<unitLabel>s</unitLabel>
+		</parameter>
+	</config-description>
+
+	<!-- Device thing -->
+	<config-description uri="thing-type:zigbee2mqtt:device">
+		<parameter name="deviceName" type="text" required="true">
+			<label>Device Name</label>
+			<description>The device's friendly_name as configured in Zigbee2MQTT. This is also the MQTT topic suffix
+				(e.g. "Living
+				Room Light" → zigbee2mqtt/Living Room Light).</description>
+		</parameter>
+	</config-description>
+
+</config-description:config-descriptions>

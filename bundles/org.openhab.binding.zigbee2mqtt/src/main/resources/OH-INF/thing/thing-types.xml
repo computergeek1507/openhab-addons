@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="zigbee2mqtt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- MQTT bridge / Zigbee2MQTT connection -->
+	<bridge-type id="bridge">
+		<label>Zigbee2MQTT Bridge</label>
+		<description>Connection to a Zigbee2MQTT instance via an MQTT broker. All Zigbee devices are added as
+			child things of
+			this bridge.</description>
+		<semantic-equipment-tag>NetworkAppliance</semantic-equipment-tag>
+		<channels>
+			<channel id="permit-join" typeId="permit-join"/>
+			<channel id="log-level" typeId="log-level"/>
+		</channels>
+		<config-description-ref uri="thing-type:zigbee2mqtt:bridge"/>
+	</bridge-type>
+
+	<!--
+		Device thing types. Channels are built dynamically in the handler from the
+		"channelDefs" thing property (populated by the discovery service from the Z2M
+		bridge/devices feature list). Well-known channels reference channel types defined
+		in channel-types.xml; unknown channels are created inline.
+	-->
+
+	<thing-type id="light">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Light</label>
+		<description>A Zigbee light or bulb managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>Lightbulb</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="plug">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Smart Plug</label>
+		<description>A Zigbee smart plug or outlet with power monitoring, managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>PowerOutlet</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="switch">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Switch</label>
+		<description>A Zigbee switch or relay managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>WallSwitch</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="climate-sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Climate Sensor</label>
+		<description>A Zigbee temperature and/or humidity sensor managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>TemperatureSensor</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="motion-sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Motion Sensor</label>
+		<description>A Zigbee occupancy or motion sensor managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>OccupancySensor</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="contact-sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Contact Sensor</label>
+		<description>A Zigbee door or window contact sensor managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>ContactSensor</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="water-sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Water Leak Sensor</label>
+		<description>A Zigbee water or flood sensor managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>LeakSensor</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="air-sensor">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Air Quality Sensor</label>
+		<description>A Zigbee air quality sensor (PM2.5, VOC, CO2, etc.) managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>AirQualitySensor</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="thermostat">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Thermostat</label>
+		<description>A Zigbee thermostat or TRV (thermostatic radiator valve) managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>HVAC</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+	<thing-type id="device">
+		<supported-bridge-type-refs>
+			<bridge-type-ref id="bridge"/>
+		</supported-bridge-type-refs>
+		<label>Zigbee Device</label>
+		<description>A generic Zigbee device managed by Zigbee2MQTT.</description>
+		<semantic-equipment-tag>NetworkAppliance</semantic-equipment-tag>
+		<config-description-ref uri="thing-type:zigbee2mqtt:device"/>
+	</thing-type>
+
+</thing:thing-descriptions>

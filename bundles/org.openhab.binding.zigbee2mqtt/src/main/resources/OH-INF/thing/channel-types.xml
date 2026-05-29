@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="zigbee2mqtt"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<!-- Bridge channels -->
+
+	<channel-type id="permit-join">
+		<item-type>Switch</item-type>
+		<label>Permit Join</label>
+		<description>Allow new Zigbee devices to join the network.</description>
+		<category>Switch</category>
+	</channel-type>
+
+	<channel-type id="log-level">
+		<item-type>String</item-type>
+		<label>Log Level</label>
+		<description>Zigbee2MQTT log level.</description>
+		<state>
+			<options>
+				<option value="debug">Debug</option>
+				<option value="info">Info</option>
+				<option value="warn">Warning</option>
+				<option value="error">Error</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<!-- Device channels — control -->
+
+	<channel-type id="state">
+		<item-type>Switch</item-type>
+		<label>State</label>
+		<description>On/Off state of the device.</description>
+		<category>Switch</category>
+	</channel-type>
+
+	<channel-type id="brightness">
+		<item-type>Dimmer</item-type>
+		<label>Brightness</label>
+		<description>Brightness level (0-100%).</description>
+		<category>DimmableLight</category>
+	</channel-type>
+
+	<channel-type id="color-temperature">
+		<item-type>Dimmer</item-type>
+		<label>Color Temperature</label>
+		<description>Color temperature (warm to cool).</description>
+		<category>ColorLight</category>
+	</channel-type>
+
+	<channel-type id="color">
+		<item-type>Color</item-type>
+		<label>Color</label>
+		<description>Color (hue, saturation, brightness).</description>
+		<category>ColorLight</category>
+	</channel-type>
+
+	<!-- Device channels — climate -->
+
+	<channel-type id="temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Temperature</label>
+		<description>Current temperature reading.</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<channel-type id="humidity">
+		<item-type>Number:Dimensionless</item-type>
+		<label>Humidity</label>
+		<description>Current humidity reading.</description>
+		<category>Humidity</category>
+		<state readOnly="true" pattern="%.1f %%"/>
+	</channel-type>
+
+	<channel-type id="pressure">
+		<item-type>Number:Pressure</item-type>
+		<label>Pressure</label>
+		<description>Atmospheric pressure.</description>
+		<category>Pressure</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<!-- Device channels — binary sensors -->
+
+	<channel-type id="contact">
+		<item-type>Contact</item-type>
+		<label>Contact</label>
+		<description>Door/window contact sensor state.</description>
+		<category>Contact</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="occupancy">
+		<item-type>Switch</item-type>
+		<label>Occupancy</label>
+		<description>Occupancy/presence detection.</description>
+		<category>Motion</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="water-leak">
+		<item-type>Switch</item-type>
+		<label>Water Leak</label>
+		<description>Water leak detection.</description>
+		<category>Water</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="smoke">
+		<item-type>Switch</item-type>
+		<label>Smoke</label>
+		<description>Smoke detection.</description>
+		<category>Smoke</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="illuminance">
+		<item-type>Number:Illuminance</item-type>
+		<label>Illuminance</label>
+		<description>Illuminance level in lux.</description>
+		<category>Light</category>
+		<state readOnly="true" pattern="%.0f %unit%"/>
+	</channel-type>
+
+	<!-- Device channels — power monitoring -->
+
+	<channel-type id="power">
+		<item-type>Number:Power</item-type>
+		<label>Power</label>
+		<description>Current power consumption.</description>
+		<category>Energy</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<channel-type id="energy">
+		<item-type>Number:Energy</item-type>
+		<label>Energy</label>
+		<description>Total energy consumed.</description>
+		<category>Energy</category>
+		<state readOnly="true" pattern="%.2f %unit%"/>
+	</channel-type>
+
+	<channel-type id="voltage">
+		<item-type>Number:ElectricPotential</item-type>
+		<label>Voltage</label>
+		<description>Voltage reading.</description>
+		<category>Energy</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<channel-type id="current">
+		<item-type>Number:ElectricCurrent</item-type>
+		<label>Current</label>
+		<description>Electric current reading.</description>
+		<category>Energy</category>
+		<state readOnly="true" pattern="%.3f %unit%"/>
+	</channel-type>
+
+	<!-- Device channels — climate control (thermostats / TRVs) -->
+
+	<channel-type id="local-temperature">
+		<item-type>Number:Temperature</item-type>
+		<label>Local Temperature</label>
+		<description>Current measured temperature at the thermostat.</description>
+		<category>Temperature</category>
+		<state readOnly="true" pattern="%.1f %unit%"/>
+	</channel-type>
+
+	<channel-type id="occupied-heating-setpoint">
+		<item-type>Number:Temperature</item-type>
+		<label>Heating Setpoint</label>
+		<description>Target heating temperature setpoint.</description>
+		<category>Temperature</category>
+		<state pattern="%.1f %unit%" step="0.5" min="5" max="35"/>
+	</channel-type>
+
+	<channel-type id="occupied-cooling-setpoint">
+		<item-type>Number:Temperature</item-type>
+		<label>Cooling Setpoint</label>
+		<description>Target cooling temperature setpoint.</description>
+		<category>Temperature</category>
+		<state pattern="%.1f %unit%" step="0.5" min="5" max="35"/>
+	</channel-type>
+
+	<channel-type id="current-heating-setpoint">
+		<item-type>Number:Temperature</item-type>
+		<label>Heating Setpoint</label>
+		<description>Target heating temperature setpoint.</description>
+		<category>Temperature</category>
+		<state pattern="%.1f %unit%" step="0.5" min="5" max="35"/>
+	</channel-type>
+
+	<channel-type id="system-mode">
+		<item-type>String</item-type>
+		<label>System Mode</label>
+		<description>HVAC system operating mode.</description>
+		<category>Heating</category>
+		<state>
+			<options>
+				<option value="off">Off</option>
+				<option value="auto">Auto</option>
+				<option value="heat">Heat</option>
+				<option value="cool">Cool</option>
+				<option value="emergency_heating">Emergency Heating</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="running-state">
+		<item-type>String</item-type>
+		<label>Running State</label>
+		<description>Current HVAC running state.</description>
+		<category>Heating</category>
+		<state readOnly="true">
+			<options>
+				<option value="idle">Idle</option>
+				<option value="heat">Heating</option>
+				<option value="cool">Cooling</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="preset">
+		<item-type>String</item-type>
+		<label>Preset</label>
+		<description>Thermostat preset mode.</description>
+		<category>Heating</category>
+		<state>
+			<options>
+				<option value="manual">Manual</option>
+				<option value="schedule">Schedule</option>
+				<option value="boost">Boost</option>
+				<option value="comfort">Comfort</option>
+				<option value="eco">Eco</option>
+				<option value="away">Away</option>
+			</options>
+		</state>
+	</channel-type>
+
+	<channel-type id="pi-heating-demand">
+		<item-type>Number:Dimensionless</item-type>
+		<label>Heating Demand</label>
+		<description>Percentage heating demand from the thermostat valve.</description>
+		<category>Heating</category>
+		<state readOnly="true" pattern="%.0f %%"/>
+	</channel-type>
+
+	<!-- Device channels — air quality -->
+
+	<channel-type id="pm25">
+		<item-type>Number:Density</item-type>
+		<label>PM2.5</label>
+		<description>PM2.5 particulate matter concentration.</description>
+		<category>Air</category>
+		<state readOnly="true" pattern="%.0f µg/m³"/>
+	</channel-type>
+
+	<channel-type id="voc-index">
+		<item-type>Number:Dimensionless</item-type>
+		<label>VOC Index</label>
+		<description>Volatile organic compound index.</description>
+		<category>Air</category>
+		<state readOnly="true" pattern="%.0f"/>
+	</channel-type>
+
+	<!-- Device channels — device metadata -->
+
+	<channel-type id="battery">
+		<item-type>Number:Dimensionless</item-type>
+		<label>Battery</label>
+		<description>Battery level percentage.</description>
+		<category>Battery</category>
+		<state readOnly="true" pattern="%.0f %%"/>
+	</channel-type>
+
+	<channel-type id="battery-low">
+		<item-type>Switch</item-type>
+		<label>Battery Low</label>
+		<description>Battery low warning.</description>
+		<category>LowBattery</category>
+		<state readOnly="true"/>
+	</channel-type>
+
+	<channel-type id="linkquality">
+		<item-type>Number:Dimensionless</item-type>
+		<label>Link Quality</label>
+		<description>Zigbee signal link quality (0-255).</description>
+		<category>QualityOfService</category>
+		<state readOnly="true" pattern="%.0f"/>
+	</channel-type>
+
+	<!-- Device channels — trigger -->
+
+	<channel-type id="action">
+		<kind>trigger</kind>
+		<label>Action</label>
+		<description>Action events from buttons and remotes (e.g. single, double, long press).</description>
+	</channel-type>
+
+</thing:thing-descriptions>
