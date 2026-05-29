@@ -75,7 +75,7 @@ import com.google.gson.reflect.TypeToken;
  * For manually-added things (no {@code channelDefs} property), channels are inferred from
  * the first received MQTT payload.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttDeviceHandler extends BaseThingHandler implements MqttMessageSubscriber {

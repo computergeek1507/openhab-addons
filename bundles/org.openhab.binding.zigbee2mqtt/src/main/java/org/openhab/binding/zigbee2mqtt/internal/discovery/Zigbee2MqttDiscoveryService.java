@@ -43,7 +43,7 @@ import com.google.gson.JsonSyntaxException;
 /**
  * Discovers Zigbee devices from the Zigbee2MQTT {@code bridge/devices} MQTT topic.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @Component(scope = ServiceScope.PROTOTYPE, service = Zigbee2MqttDiscoveryService.class)
 @NonNullByDefault

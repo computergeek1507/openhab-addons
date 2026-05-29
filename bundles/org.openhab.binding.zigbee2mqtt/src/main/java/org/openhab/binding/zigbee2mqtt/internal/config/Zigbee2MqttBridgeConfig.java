@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Configuration for the Zigbee2MQTT bridge (MQTT broker + Z2M connection).
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttBridgeConfig {

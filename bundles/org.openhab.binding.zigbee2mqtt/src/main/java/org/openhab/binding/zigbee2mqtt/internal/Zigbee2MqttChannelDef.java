@@ -25,7 +25,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
  * Fields must be non-final (and a no-arg constructor must exist) so that Gson can
  * deserialise instances without relying on {@code sun.misc.Unsafe}.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttChannelDef {

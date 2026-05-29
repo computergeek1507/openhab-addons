@@ -17,7 +17,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 /**
  * Configuration for a single Zigbee device managed by Zigbee2MQTT.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttDeviceConfig {

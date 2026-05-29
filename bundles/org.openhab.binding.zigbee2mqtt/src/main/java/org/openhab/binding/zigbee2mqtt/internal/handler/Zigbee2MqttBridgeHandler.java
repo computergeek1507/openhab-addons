@@ -59,7 +59,7 @@ import com.google.gson.JsonSyntaxException;
  * <li>Tracks device availability via {@code <baseTopic>/+/availability}.</li>
  * </ul>
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttBridgeHandler extends BaseBridgeHandler

@@ -31,7 +31,7 @@ import org.osgi.service.component.annotations.Component;
 /**
  * Factory creating Zigbee2MQTT bridge and device handlers.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 @Component(configurationPid = "binding.zigbee2mqtt", service = ThingHandlerFactory.class)

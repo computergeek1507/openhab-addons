@@ -21,7 +21,7 @@ import org.openhab.core.thing.ThingTypeUID;
 /**
  * Constants for the Zigbee2MQTT binding.
  *
- * @author openHAB Contributors - Initial contribution
+ * @author Scott Hanson - Initial contribution
  */
 @NonNullByDefault
 public class Zigbee2MqttBindingConstants {
