@@ -33,6 +33,7 @@
     <module>org.openhab.io.metrics</module>
     <module>org.openhab.io.neeo</module>
     <module>org.openhab.io.openhabcloud</module>
+    <module>org.openhab.io.yamlcomposer</module>
     <!-- transformations -->
     <module>org.openhab.transform.basicprofiles</module>
     <module>org.openhab.transform.bin2json</module>
@@ -117,6 +118,7 @@
     <module>org.openhab.binding.dali</module>
     <module>org.openhab.binding.danfossairunit</module>
     <module>org.openhab.binding.dbquery</module>
+    <module>org.openhab.binding.ddwrt</module>
     <module>org.openhab.binding.deconz</module>
     <module>org.openhab.binding.denonmarantz</module>
     <module>org.openhab.binding.deutschebahn</module>
@@ -180,6 +182,7 @@
     <module>org.openhab.binding.ftpupload</module>
     <module>org.openhab.binding.gardena</module>
     <module>org.openhab.binding.gce</module>
+    <module>org.openhab.binding.gemini</module>
     <module>org.openhab.binding.generacmobilelink</module>
     <module>org.openhab.binding.goecharger</module>
     <module>org.openhab.binding.govee</module>
@@ -204,6 +207,7 @@
     <module>org.openhab.binding.herzborg</module>
     <module>org.openhab.binding.homeassistant</module>
     <module>org.openhab.binding.homeconnect</module>
+    <module>org.openhab.binding.homeconnectdirect</module>
     <module>org.openhab.binding.homekit</module>
     <module>org.openhab.binding.homie</module>
     <module>org.openhab.binding.homematic</module>
@@ -320,6 +324,7 @@
     <module>org.openhab.binding.nikohomecontrol</module>
     <module>org.openhab.binding.nobohub</module>
     <module>org.openhab.binding.novafinedust</module>
+    <module>org.openhab.binding.ntfy</module>
     <module>org.openhab.binding.ntp</module>
     <module>org.openhab.binding.nuki</module>
     <module>org.openhab.binding.nuvo</module>
@@ -350,6 +355,7 @@
     <module>org.openhab.binding.pihole</module>
     <module>org.openhab.binding.pilight</module>
     <module>org.openhab.binding.pioneeravr</module>
+    <module>org.openhab.binding.pirateweather</module>
     <module>org.openhab.binding.pixometer</module>
     <module>org.openhab.binding.pjlinkdevice</module>
     <module>org.openhab.binding.playstation</module>
@@ -456,9 +462,7 @@
     <module>org.openhab.binding.tuya</module>
     <module>org.openhab.binding.twilio</module>
     <module>org.openhab.binding.unifi</module>
-    <module>org.openhab.binding.unifiaccess</module>
     <module>org.openhab.binding.unifiedremote</module>
-    <module>org.openhab.binding.unifiprotect</module>
     <module>org.openhab.binding.upnpcontrol</module>
     <module>org.openhab.binding.upb</module>
     <module>org.openhab.binding.urtsi</module>
@@ -687,7 +691,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-dependency-plugin</artifactId>
-        <version>3.10.0</version>
+        <version>3.11.0</version>
         <executions>
           <execution>
             <id>embed-dependencies</id>
@@ -797,7 +801,7 @@
       <plugin>
         <groupId>com.github.eirslett</groupId>
         <artifactId>frontend-maven-plugin</artifactId>
-        <version>2.0.0</version>
+        <version>2.0.1</version>
 
         <configuration>
           <!-- Central toolchain for markdownlint (Node 24) -->
